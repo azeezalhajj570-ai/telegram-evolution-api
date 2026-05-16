@@ -5,7 +5,7 @@ import time
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.api import auth, chats, instances, messages, webhooks
+from app.api import auth, chats, instances, messages, queue, webhooks
 from app.config import settings
 from app.db.database import Base, async_session, engine
 from app.db.repositories import InstanceRepository
@@ -33,10 +33,11 @@ async def _reconnect_instances():
 
 
 _worker_task = None
+_msg_worker = None
 
 
 async def lifespan(app: FastAPI):
-    global _worker_task
+    global _worker_task, _msg_worker
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -59,18 +60,23 @@ async def lifespan(app: FastAPI):
 
     await _reconnect_instances()
 
-    from app.workers.webhook_worker import run_worker_loop
-    _worker_task = asyncio.create_task(run_worker_loop(interval=60))
+    from app.workers.message_worker import run_worker_loop as run_msg_worker
+    _msg_worker = asyncio.create_task(run_msg_worker(interval=2.0))
+    logger.info("Message queue worker started")
+
+    from app.workers.webhook_worker import run_worker_loop as run_wh_worker
+    _worker_task = asyncio.create_task(run_wh_worker(interval=60))
     logger.info("Webhook retry worker started")
 
     yield
 
-    if _worker_task:
-        _worker_task.cancel()
-        try:
-            await _worker_task
-        except asyncio.CancelledError:
-            pass
+    for t in (_msg_worker, _worker_task):
+        if t:
+            t.cancel()
+            try:
+                await t
+            except asyncio.CancelledError:
+                pass
     from app.services.telegram_manager import client_manager
     await client_manager.stop_all()
 
@@ -86,6 +92,7 @@ app.include_router(auth.router)
 app.include_router(messages.router)
 app.include_router(chats.router)
 app.include_router(webhooks.router)
+app.include_router(queue.router)
 
 
 @app.exception_handler(Exception)
