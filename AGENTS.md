@@ -1,7 +1,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at `specs/001-telegram-api-gateway/plan.md`
+at `specs/002-rich-messaging/plan.md`
 <!-- SPECKIT END -->
 
 ## Project Constitution
