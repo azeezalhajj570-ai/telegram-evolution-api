@@ -27,6 +27,7 @@ class Instance(Base):
     phone_number = Column(String(32), nullable=True)
     status = Column(String(32), nullable=False, default="pending")
     session_encrypted = Column(Text, nullable=True)
+    temp_session = Column(Text, nullable=True)
     phone_code_hash = Column(String(64), nullable=True)
     twofa_password_hash = Column(String(128), nullable=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
