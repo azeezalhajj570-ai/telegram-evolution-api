@@ -1,176 +1,113 @@
-# Implementation Plan: Telegram API Gateway
+# Implementation Plan: [FEATURE]
 
-**Branch**: `001-telegram-api-gateway` | **Date**: 2026-05-16 | **Spec**: [spec.md](./spec.md)
+**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 
-**Input**: Feature specification from `/specs/001-telegram-api-gateway/spec.md`
+**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+
+**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
 ## Summary
 
-Self-hosted REST API Gateway that manages Telegram account instances via Telethon. Provides instance lifecycle (create/auth/connect/disconnect/delete), message sending, chat listing, and real-time webhook delivery for incoming messages. Exposes a FastAPI HTTP interface authenticated by API keys.
+[Extract from feature spec: primary requirement + technical approach from research]
 
 ## Technical Context
 
-**Language/Version**: Python 3.12
+<!--
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
+-->
 
-**Primary Dependencies**: FastAPI, Telethon, SQLAlchemy 2.x (async), Alembic, Pydantic v2, httpx, Redis (via redis-py)
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
 
-**Storage**: PostgreSQL (primary data), Redis (webhook retry queue, rate-limit counters)
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
 
-**Testing**: pytest, pytest-asyncio, httpx (mock for webhook tests)
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
-**Target Platform**: Linux (Docker Compose deployment)
+**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
 
-**Project Type**: web-service (REST API)
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
 
-**Performance Goals**: <10s message delivery (SC-003), <15s webhook delivery (SC-004), 5+ concurrent instances (SC-005)
+**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
 
-**Constraints**: <200ms p95 API response (excluding Telegram network calls), encrypted session storage, no sensitive data in logs
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
 
-**Scale/Scope**: Single-server MVP, 5-20 Telegram instances, single PostgreSQL + single Redis
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
+
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-**I. Code Quality** ✅
-- Pydantic v2 schemas for all request/response validation → typed, validated
-- SQLAlchemy 2.x async ORM with type-annotated models
-- FastAPI auto-generates OpenAPI spec → documentation follows
-- Structured error responses with context (actionable error messages)
-
-**II. Testing Standards** ✅
-- Unit tests: encryption, API key hashing, webhook signing, Pydantic validation
-- Integration tests: mocked Telethon client for auth + messaging flows
-- Webhook dispatcher tests: httpx mock
-- Red-green-refactor: write failing test first for each bug fix
-
-**III. User Experience Consistency** ✅
-- RESTful JSON API with consistent error schema
-- All instance operations under `/instances/{id}` prefix
-- Standard HTTP status codes (200, 201, 400, 401, 404, 429, 500)
-- OpenAPI documentation via `/docs`
-
-**IV. Performance Requirements** ✅
-- Instance-scoped client pool (no per-request Telethon client creation)
-- Async I/O throughout (FastAPI async + SQLAlchemy async + Telethon async)
-- Redis-backed rate limiting per instance on send-message
-- N+1 prevention: eager-load webhook config with instance query
-
-**V. Security & Observability** ✅
-- API key authentication on all endpoints (bcrypt-hashed keys in DB)
-- AES-256-GCM encryption for Telethon StringSession
-- HMAC SHA256 webhook payload signing
-- Structured logging (no OTP/2FA/API key/session data in logs)
-- Health endpoint (`GET /health`) exposing readiness + liveness
-
-**GATE RESULT**: PASS ✅ — No violations. All principles satisfied.
+[Gates determined based on constitution file]
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/001-telegram-api-gateway/
-├── plan.md              # This file
-├── spec.md              # Feature specification
-├── research.md          # Phase 0 — technology decisions
-├── data-model.md        # Phase 1 — entities, fields, relationships
-├── quickstart.md        # Phase 1 — setup & run guide
-├── contracts/           # Phase 1 — REST API contracts
-│   ├── instances.md
-│   ├── auth.md
-│   ├── messages.md
-│   ├── chats.md
-│   ├── webhooks.md
-│   └── health.md
-└── tasks.md             # Phase 2 — NOT created by /speckit.plan
+specs/[###-feature]/
+├── plan.md              # This file (/speckit.plan command output)
+├── research.md          # Phase 0 output (/speckit.plan command)
+├── data-model.md        # Phase 1 output (/speckit.plan command)
+├── quickstart.md        # Phase 1 output (/speckit.plan command)
+├── contracts/           # Phase 1 output (/speckit.plan command)
+└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
 ```
 
 ### Source Code (repository root)
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
 
 ```text
-app/
-├── __init__.py
-├── main.py                   # FastAPI app, lifespan, startup/shutdown
-├── config.py                 # Settings via pydantic-settings
-├── security/
-│   ├── __init__.py
-│   ├── api_keys.py           # API key hashing + verification
-│   ├── encryption.py         # AES-256-GCM session encrypt/decrypt
-│   └── webhook_signing.py    # HMAC SHA256 payload signing
-├── db/
-│   ├── __init__.py
-│   ├── database.py           # AsyncSession factory, engine
-│   ├── models.py             # SQLAlchemy ORM models
-│   └── repositories.py       # DB access layer (CRUD)
-├── schemas/
-│   ├── __init__.py
-│   ├── instances.py          # Instance CRUD request/response
-│   ├── auth.py               # Auth flow request/response
-│   ├── messages.py           # Message send/read request/response
-│   └── webhooks.py           # Webhook config request/response
-├── api/
-│   ├── __init__.py
-│   ├── instances.py          # GET/POST/DELETE /instances
-│   ├── auth.py               # POST /instances/{id}/auth/*
-│   ├── messages.py           # POST /instances/{id}/send-message
-│   ├── chats.py              # GET /instances/{id}/chats
-│   └── webhooks.py           # CRUD /instances/{id}/webhook
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+src/
+├── models/
 ├── services/
-│   ├── __init__.py
-│   ├── telegram_manager.py   # Telethon client pool lifecycle
-│   ├── telegram_auth.py      # Auth state machine (send_code → verify → 2fa → connect)
-│   ├── messaging.py          # Send message via Telethon client
-│   ├── chats.py              # List chats, get messages
-│   ├── webhook_dispatcher.py # Normalize event → POST to webhook URL
-│   └── rate_limits.py        # Redis-based per-instance rate limiting
-└── workers/
-    ├── __init__.py
-    └── webhook_worker.py     # Process webhook retry queue from Redis
+├── cli/
+└── lib/
 
 tests/
-├── __init__.py
-├── conftest.py               # Fixtures: async client, test DB, mocked Telethon
-├── test_encryption.py        # Unit: encrypt/decrypt round-trip
-├── test_api_keys.py           # Unit: hash + verify
-├── test_webhook_signing.py   # Unit: HMAC SHA256 sign + verify
-├── test_validation.py        # Unit: Pydantic schema validation
-├── test_auth_flow.py         # Integration: mocked Telethon auth
-├── test_messaging.py         # Integration: mocked Telethon send
-└── test_webhook_dispatcher.py# Unit/Integration: httpx mock
+├── contract/
+├── integration/
+└── unit/
 
-migrations/
-├── env.py
-├── alembic.ini
-└── versions/
-    └── 001_initial_schema.py
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+backend/
+├── src/
+│   ├── models/
+│   ├── services/
+│   └── api/
+└── tests/
 
-Dockerfile
-docker-compose.yml
-pyproject.toml
-README.md
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+└── tests/
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: Single project layout (`app/`) with layered architecture (api → services → db/telethon). This is a pure backend web service — no frontend, no mobile. Tests mirror the app structure under `tests/`.
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Complexity Tracking
 
-No Constitution violations found. No complexity justification required.
+> **Fill ONLY if Constitution Check has violations that must be justified**
 
-## Phase 0 — Research
-
-**Purpose**: Confirm all technology decisions and resolve any unknowns before design.
-
-**Findings documented in**: `research.md`
-
-**No unknowns to resolve** — the user has explicitly specified all technology choices (Python 3.12, FastAPI, Telethon, PostgreSQL, SQLAlchemy 2.x async, Alembic, Redis, Pydantic v2, httpx, Docker Compose, pytest) and the architecture.
-
-## Phase 1 — Design & Contracts
-
-**Prerequisites**: research.md complete.
-
-**Generated artifacts**:
-1. `data-model.md` — Entity definitions, fields, relationships, state transitions
-2. `contracts/` — REST API endpoint contracts (paths, methods, request/response shapes)
-3. `quickstart.md` — Local dev setup, run, test instructions
-4. `AGENTS.md` — Agent context update (plan reference between SPECKIT markers)
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
