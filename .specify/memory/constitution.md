@@ -1,50 +1,118 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Version change: (template) → 1.0.0
+Modified principles: N/A (initial population from template)
+Added sections:
+  - I. Code Quality
+  - II. Testing Standards
+  - III. User Experience Consistency
+  - IV. Performance Requirements
+  - V. Security & Observability
+  - Technology & Architecture Constraints (Section 2)
+  - Development Workflow & Quality Gates (Section 3)
+  - Governance (fully populated)
+Removed sections: N/A
+Templates requiring updates:
+  - .specify/templates/tasks-template.md → ⚠️ requires update: "Tests are OPTIONAL" line contradicts mandatory testing principle
+Follow-up TODOs: N/A
+-->
+
+# Telegram Evolution API Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Code Quality
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Every codebase MUST be maintainable, readable, and consistent. Code reviews
+are mandatory for all changes. Linting and formatting MUST be enforced via
+automated tooling. No dead code, commented-out code, or TODO/FIXME without
+an associated issue reference. Complexity MUST be justified — prefer simple
+solutions over clever ones. All public APIs MUST include type annotations or
+typed interfaces. Error messages MUST be actionable and include context.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### II. Testing Standards
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+Testing is NON-NEGOTIABLE. Every feature MUST include contract, integration,
+and unit tests where applicable. Tests MUST be deterministic, independent, and
+run as part of CI. No code reaches production without passing tests. The
+red-green-refactor cycle MUST be followed for new features. Test coverage
+MUST not regress — a failing test MUST be written before implementation code.
+Flaky tests MUST be quarantined and fixed within one sprint.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### III. User Experience Consistency
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+All user-facing interfaces MUST follow a consistent design language,
+terminology, and interaction pattern. Error states, loading states, and empty
+states MUST be handled explicitly — no unhandled edge cases. Output formats
+(CLI, API responses, logs) MUST be consistent in structure, naming, and error
+codes. Documentation MUST accompany all user-facing changes. Accessibility
+MUST be considered for all UI surfaces.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### IV. Performance Requirements
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+All features MUST define and meet measurable performance objectives. Latency
+budgets MUST be established per endpoint or operation. Throughput and scaling
+characteristics MUST be documented for service boundaries. Degradation under
+load MUST be graceful and predictable. Database queries MUST be optimized —
+N+1 patterns are forbidden in production paths. Performance MUST be part of
+the review checklist; any change that materially affects performance MUST
+include before/after benchmarks.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### V. Security & Observability
+
+Security MUST be considered at every layer. All inputs MUST be validated and
+sanitized. Secrets MUST never be hardcoded, logged, or committed.
+Least-privilege access MUST be enforced for all service-to-service
+communication. Structured logging is required for all services. Key metrics
+(latency, error rate, throughput) MUST be exposed via a health endpoint.
+Every failure mode MUST produce a traceable log entry with correlation
+identifiers.
+
+## Technology & Architecture Constraints
+
+The primary implementation language MUST align with project conventions and
+team expertise. Dependencies MUST be pinned to exact versions. No new
+dependency MUST be added without evaluating its maintenance status, license
+compatibility, and blast radius. Architecture MUST follow the patterns
+established in the project — avoid introducing new frameworks, patterns, or
+infrastructure without documented justification. Schema changes MUST be
+backward-compatible or go through a documented migration plan.
+
+## Development Workflow & Quality Gates
+
+All changes MUST go through a pull request process with at least one approving
+review before merge. The following gates MUST pass before merge:
+
+- All tests pass (no skipped or ignored tests without justification)
+- Linting and formatting checks pass
+- No regressions in performance benchmarks (if applicable)
+- Constitution compliance verification (complexity justification if violated)
+- No secrets or sensitive data in the diff
+
+Branch naming MUST follow the pattern `[###]-feature-name` where `###` is a
+sequential issue number. Commits MUST be atomic and have descriptive messages.
+Feature flags MUST be used for incomplete or experimental functionality.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This Constitution supersedes all other process documentation. Amendments
+require a documented proposal, team review, and explicit approval before
+adoption.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Amendment Process**:
+1. Draft the proposed change with rationale
+2. Open a review with affected stakeholders
+3. Achieve consensus or majority approval
+4. Update this document, incrementing the version according to semver
+5. Propagate changes to dependent templates and guidance files
+
+**Versioning Policy**:
+- MAJOR: Backward-incompatible governance or principle removals/redefinitions
+- MINOR: New principle or materially expanded guidance
+- PATCH: Clarifications, wording refinements, typo fixes
+
+**Compliance**: All PRs/reviews MUST verify compliance with these principles.
+Complexity MUST be justified when a principle is violated. Runtime
+development guidance is maintained in `AGENTS.md` (agent guidance) and team
+conventions.
+
+**Version**: 1.0.0 | **Ratified**: 2026-05-16 | **Last Amended**: 2026-05-16
