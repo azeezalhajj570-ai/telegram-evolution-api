@@ -5,7 +5,7 @@ import time
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.api import auth, chats, instances, messages, webhooks
+from app.api import auth, chats, contacts_groups, instances, messages, webhooks
 from app.config import settings
 from app.db.database import Base, async_session, engine
 from app.db.repositories import InstanceRepository
@@ -86,6 +86,7 @@ app.include_router(auth.router)
 app.include_router(messages.router)
 app.include_router(chats.router)
 app.include_router(webhooks.router)
+app.include_router(contacts_groups.router)
 
 
 @app.exception_handler(Exception)
