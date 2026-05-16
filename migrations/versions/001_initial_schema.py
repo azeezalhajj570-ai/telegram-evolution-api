@@ -33,6 +33,7 @@ def upgrade() -> None:
         sa.Column("phone_number", sa.String(32), nullable=True),
         sa.Column("status", sa.String(32), nullable=False, server_default=sa.text("'pending'")),
         sa.Column("session_encrypted", sa.Text(), nullable=True),
+        sa.Column("temp_session", sa.Text(), nullable=True),
         sa.Column("phone_code_hash", sa.String(64), nullable=True),
         sa.Column("twofa_password_hash", sa.String(128), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False, server_default=sa.func.now()),
