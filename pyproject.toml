@@ -1,8 +1,27 @@
 [project]
 name = "telegram-evolution-api"
 version = "0.1.0"
-description = "Self-hosted Telegram API Gateway with Telethon and FastAPI"
+description = "Self-hosted REST API gateway for Telegram built with Telethon and FastAPI. Manage multiple accounts, send messages, handle media, and receive real-time webhooks."
+readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.9"
+authors = [
+    {name = "Azeez Al-Hajj", email = "azeezalhajj570@gmail.com"}
+]
+keywords = ["telegram", "api", "gateway", "telethon", "fastapi", "messaging", "bot"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: FastAPI",
+    "Topic :: Communications :: Chat",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.30.0",
@@ -24,7 +43,17 @@ dev = [
     "pytest>=8.3.0",
     "pytest-asyncio>=0.24.0",
     "aiosqlite>=0.20.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.6.0",
+    "mypy>=1.11.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/azeezalhajj570-ai/telegram-evolution-api"
+Documentation = "https://github.com/azeezalhajj570-ai/telegram-evolution-api#readme"
+Repository = "https://github.com/azeezalhajj570-ai/telegram-evolution-api"
+Issues = "https://github.com/azeezalhajj570-ai/telegram-evolution-api/issues"
+Changelog = "https://github.com/azeezalhajj570-ai/telegram-evolution-api/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["setuptools>=75.0.0"]
@@ -36,3 +65,16 @@ include = ["app*"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
