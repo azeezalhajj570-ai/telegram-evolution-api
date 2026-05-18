@@ -32,7 +32,7 @@ async def send_message(instance_id: str, body: SendMessageRequest, db: AsyncSess
         )
 
     try:
-        return await svc_send_message(uid, body.chat_id, body.text)
+        return await svc_send_message(uid, body.text, chat_id=body.chat_id, username=body.username, phone_number=body.phone_number)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except FloodWaitError as e:
