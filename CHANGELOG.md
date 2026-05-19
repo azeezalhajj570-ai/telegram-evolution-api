@@ -49,5 +49,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker Compose setup with PostgreSQL and Redis
 - Basic test suite
 
-[Unreleased]: https://github.com/azeezalhajj570-ai/telegram-evolution-api/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/azeezalhajj570-ai/telegram-evolution-api/releases/tag/v0.1.0
+[Unreleased]: https://github.com/azeezalhajj570-ai/relaystack-api/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/azeezalhajj570-ai/relaystack-api/releases/tag/v0.1.0

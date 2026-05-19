@@ -1,4 +1,4 @@
-# Quickstart: Telegram API Gateway
+# Quickstart: RelayStack API
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@
 
 ```bash
 # Clone and enter the repo
-git clone <repo-url> && cd telegram-evolution-api
+git clone <repo-url> && cd relaystack-api
 
 # Create virtual environment
 python3.12 -m venv .venv && source .venv/bin/activate

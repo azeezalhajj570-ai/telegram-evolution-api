@@ -8,6 +8,18 @@ services:
     networks:
       - madarbot_default
 
+  mcp-sse:
+    build: .
+    ports:
+      - "127.0.0.1:3011:8001"
+    env_file: .env
+    environment:
+      - MCP_TRANSPORT=sse
+    restart: unless-stopped
+    command: ["uvicorn", "app.mcp.sse:sse_app", "--host", "0.0.0.0", "--port", "8001"]
+    networks:
+      - madarbot_default
+
 networks:
   madarbot_default:
     external: true

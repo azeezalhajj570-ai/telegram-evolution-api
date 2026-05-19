@@ -1,4 +1,4 @@
-# Implementation Plan: Telegram API Gateway
+# Implementation Plan: RelayStack API
 
 **Branch**: `001-telegram-api-gateway` | **Date**: 2026-05-16 | **Spec**: [spec.md](./spec.md)
 

@@ -1,10 +1,10 @@
 [project]
-name = "telegram-evolution-api"
+name = "relaystack-api"
 version = "0.1.0"
-description = "Self-hosted REST API gateway for Telegram built with Telethon and FastAPI. Manage multiple accounts, send messages, handle media, and receive real-time webhooks."
+description = "Self-hosted messaging automation API with multi-account management, messaging, and real-time webhooks. Current provider: Telegram via MTProto."
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     {name = "Azeez Al-Hajj", email = "azeezalhajj570@gmail.com"}
 ]
@@ -36,6 +36,7 @@ dependencies = [
     "cryptography>=43.0.0",
     "bcrypt>=4.2.0",
     "python-dotenv>=1.0.0",
+    "mcp>=1.0.0,<2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -49,11 +50,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/azeezalhajj570-ai/telegram-evolution-api"
-Documentation = "https://github.com/azeezalhajj570-ai/telegram-evolution-api#readme"
-Repository = "https://github.com/azeezalhajj570-ai/telegram-evolution-api"
-Issues = "https://github.com/azeezalhajj570-ai/telegram-evolution-api/issues"
-Changelog = "https://github.com/azeezalhajj570-ai/telegram-evolution-api/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/azeezalhajj570-ai/relaystack-api"
+Documentation = "https://github.com/azeezalhajj570-ai/relaystack-api#readme"
+Repository = "https://github.com/azeezalhajj570-ai/relaystack-api"
+Issues = "https://github.com/azeezalhajj570-ai/relaystack-api/issues"
+Changelog = "https://github.com/azeezalhajj570-ai/relaystack-api/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["setuptools>=75.0.0"]

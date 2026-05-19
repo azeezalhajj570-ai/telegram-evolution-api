@@ -1,4 +1,4 @@
-# Data Model: Telegram API Gateway
+# Data Model: RelayStack API
 
 **Entities, fields, relationships, and state transitions.**
 

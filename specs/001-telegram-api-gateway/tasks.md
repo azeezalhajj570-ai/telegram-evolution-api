@@ -1,8 +1,8 @@
 ---
-description: "Implementation tasks for Telegram API Gateway feature"
+description: "Implementation tasks for RelayStack API feature"
 ---
 
-# Tasks: Telegram API Gateway
+# Tasks: RelayStack API
 
 **Input**: Design documents from `/specs/001-telegram-api-gateway/`
 
@@ -166,7 +166,7 @@ description: "Implementation tasks for Telegram API Gateway feature"
 
 - [ ] T050 [P] Add pytest test suite configuration — create `tests/conftest.py` with fixtures: async test client (httpx.AsyncClient with app), test database (separate SQLite or test PostgreSQL), `override_get_db` dependency, mocked Telethon client fixture using `unittest.mock.AsyncMock`, sample instance fixture, sample webhook fixture
 - [ ] T051 [P] Add README with setup and API examples — write `README.md` covering: what the project does, prerequisites (Python 3.12, Docker), quickstart (docker compose up), API overview with curl examples for each endpoint, environment variables table, project structure tree
-- [ ] T052 [P] Add OpenAPI tags and descriptions — tag all routers in `app/api/*.py` with `tags=["Instances"]`, `tags=["Auth"]`, `tags=["Messages"]`, `tags=["Chats"]`, `tags=["Webhooks"]`. Add summary and description docstrings to each endpoint. Add `title="Telegram API Gateway"` and `version="0.1.0"` to FastAPI app
+- [ ] T052 [P] Add OpenAPI tags and descriptions — tag all routers in `app/api/*.py` with `tags=["Instances"]`, `tags=["Auth"]`, `tags=["Messages"]`, `tags=["Chats"]`, `tags=["Webhooks"]`. Add summary and description docstrings to each endpoint. Add `title="RelayStack API"` and `version="0.1.0"` to FastAPI app
 - [ ] T053 [P] Add production notes — create `PRODUCTION.md` with: Telegram account safety guidelines (don't use primary account, monitor for bans, respect rate limits), rate limit handling behavior, scaling considerations (multiple app instances need shared session storage), monitoring recommendations, backup and restore of encrypted sessions, known limitations
 - [ ] T054 Add overall error handling middleware — implement global exception handler in `app/main.py` that catches unhandled exceptions, logs with traceback (no sensitive data), returns `{"error": "internal_error", "detail": "An unexpected error occurred"}` with HTTP 500
 - [ ] T055 Add health check endpoint — `GET /health` returns `{"status": "healthy", "db": "connected", "redis": "connected", "instances": {"total": N, "connected": N}}` with HTTP 503 if DB or Redis is unreachable

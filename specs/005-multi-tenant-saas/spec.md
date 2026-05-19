@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Convert the Telegram Evolution API from single-owner MVP into a SaaS-ready multi-tenant platform with organizations, roles, scoped API keys, usage quotas, and audit logs."
+**Input**: User description: "Convert the RelayStack API from single-owner MVP into a SaaS-ready multi-tenant platform with organizations, roles, scoped API keys, usage quotas, and audit logs."
 
 ## User Scenarios & Testing *(mandatory)*
 

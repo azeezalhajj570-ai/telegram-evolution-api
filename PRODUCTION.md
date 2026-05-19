@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-This guide covers deploying Telegram Evolution API in a production environment.
+This guide covers deploying RelayStack API in a production environment.
 
 ## Prerequisites
 
@@ -14,8 +14,8 @@ This guide covers deploying Telegram Evolution API in a production environment.
 
 ```bash
 # Clone and configure
-git clone https://github.com/your-org/telegram-evolution-api.git
-cd telegram-evolution-api
+git clone https://github.com/your-org/relaystack-api.git
+cd relaystack-api
 cp .env.example .env
 
 # Edit .env with your production values
@@ -129,7 +129,7 @@ curl http://localhost:8000/metrics
 
 ```yaml
 scrape_configs:
-  - job_name: 'telegram-evolution-api'
+  - job_name: 'relaystack-api'
     scrape_interval: 15s
     static_configs:
       - targets: ['localhost:8000']

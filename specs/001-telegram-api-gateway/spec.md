@@ -1,4 +1,4 @@
-# Feature Specification: Telegram API Gateway
+# Feature Specification: RelayStack API
 
 **Feature Branch**: `001-telegram-api-gateway`
 
@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description of self-hosted Telegram API Gateway with instance management, authentication, messaging, and webhooks.
+**Input**: User description of self-hosted messaging API with instance management, authentication, messaging, and webhooks.
 
 ## User Scenarios & Testing *(mandatory)*
 

@@ -1,4 +1,4 @@
-# Research: Telegram API Gateway — Technology Decisions
+# Research: RelayStack API — Technology Decisions
 
 **Phase 0 Output** — All decisions confirmed from user specification.
 

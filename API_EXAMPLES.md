@@ -1,6 +1,6 @@
 # API Examples
 
-Complete examples for common Telegram Evolution API workflows.
+Complete examples for common RelayStack API workflows.
 
 ## Setup
 
@@ -105,7 +105,7 @@ curl -X POST "$API_URL/instances/$INSTANCE_ID/send-message" \
   -H "Content-Type: application/json" \
   -d '{
     "chat_id": 123456789,
-    "text": "Hello from Telegram Evolution API!"
+    "text": "Hello from RelayStack API!"
   }'
 ```
 

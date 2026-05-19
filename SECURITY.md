@@ -8,7 +8,7 @@
 
 ## Reporting a Vulnerability
 
-We take the security of Telegram Evolution API seriously. If you discover a security vulnerability, please follow these steps:
+We take the security of RelayStack API seriously. If you discover a security vulnerability, please follow these steps:
 
 1. **DO NOT** open a public GitHub issue
 2. Email us at azeezalhajj570@gmail.com with details about the vulnerability

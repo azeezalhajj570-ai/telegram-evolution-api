@@ -1,11 +1,11 @@
-# Telegram Evolution API
+# RelayStack API
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com/)
 [![Telethon](https://img.shields.io/badge/Telethon-1.37+-2596be.svg)](https://docs.telethon.dev/)
 
-A self-hosted REST API gateway for Telegram built with [Telethon](https://github.com/LonamiWebs/Telethon) and [FastAPI](https://fastapi.tiangolo.com/). Manage multiple Telegram accounts, send and receive messages, handle media, manage contacts/groups/channels, and receive real-time webhooks — all through a clean HTTP API.
+A self-hosted messaging automation API. Manage multiple Telegram accounts, send and receive messages, handle media, manage contacts/groups/channels, and receive real-time webhooks — all through a clean HTTP API. **Current provider: Telegram via [MTProto](https://core.telegram.org/mtproto).**
 
 ## Features
 
@@ -29,8 +29,8 @@ A self-hosted REST API gateway for Telegram built with [Telethon](https://github
 
 ```bash
 # Clone the repository
-git clone https://github.com/azeezalhajj570-ai/telegram-evolution-api.git
-cd telegram-evolution-api
+git clone https://github.com/azeezalhajj570-ai/relaystack-api.git
+cd relaystack-api
 
 # Configure environment
 cp .env.example .env

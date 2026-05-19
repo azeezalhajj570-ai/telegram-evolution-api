@@ -45,6 +45,12 @@ class InstanceRepository:
         result = await self.db.execute(select(Instance).where(Instance.phone_number == phone))
         return result.scalar_one_or_none()
 
+    async def get_by_mcp_api_key_hash(self, key_hash: str) -> Optional[Instance]:
+        result = await self.db.execute(
+            select(Instance).where(Instance.mcp_api_key_hash == key_hash)
+        )
+        return result.scalar_one_or_none()
+
 
 class WebhookRepository:
     def __init__(self, db: AsyncSession):

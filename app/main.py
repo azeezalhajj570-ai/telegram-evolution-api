@@ -76,7 +76,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Telegram API Gateway",
+    title="RelayStack API",
+    description="Self-hosted messaging automation API. Current provider: Telegram via MTProto.",
     version="0.1.0",
     lifespan=lifespan,
 )

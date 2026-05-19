@@ -30,6 +30,7 @@ class Instance(Base):
     temp_session = Column(Text, nullable=True)
     phone_code_hash = Column(String(64), nullable=True)
     twofa_password_hash = Column(String(128), nullable=True)
+    mcp_api_key_hash = Column(String(128), nullable=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 

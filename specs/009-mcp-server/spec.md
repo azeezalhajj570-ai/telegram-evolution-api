@@ -6,13 +6,13 @@
 
 **Status**: Draft
 
-**Input**: User description: "Add MCP (Model Context Protocol) server support so AI agents can interact with Telegram Evolution API natively through tools like Claude Desktop, Cursor, and other MCP-compatible clients."
+**Input**: User description: "Add MCP (Model Context Protocol) server support so AI agents can interact with RelayStack API natively through tools like Claude Desktop, Cursor, and other MCP-compatible clients."
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - MCP Server Setup (Priority: P1)
 
-As a developer using AI assistants, I want to configure the Telegram Evolution API as an MCP server so that my AI agent can directly interact with my Telegram accounts.
+As a developer using AI assistants, I want to configure the RelayStack API as an MCP server so that my AI agent can directly interact with my Telegram accounts.
 
 **Why this priority**: Without the MCP server running and discoverable, no other MCP features work.
 
@@ -20,7 +20,7 @@ As a developer using AI assistants, I want to configure the Telegram Evolution A
 
 **Acceptance Scenarios**:
 
-1. **Given** a running Telegram Evolution API, **When** I start the MCP server, **Then** it exposes a stdio and/or SSE transport endpoint.
+1. **Given** a running RelayStack API, **When** I start the MCP server, **Then** it exposes a stdio and/or SSE transport endpoint.
 2. **Given** an MCP client configuration, **When** I add the Telegram MCP server config, **Then** the client discovers all available tools.
 3. **Given** an MCP server running, **When** I request the tools list, **Then** it returns all registered tools with descriptions and JSON schemas.
 4. **Given** the MCP server is configured with an API key, **When** a tool is called, **Then** the request is authenticated against the Telegram API.

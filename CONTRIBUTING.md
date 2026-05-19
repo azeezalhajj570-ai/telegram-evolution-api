@@ -1,4 +1,4 @@
-# Contributing to Telegram Evolution API
+# Contributing to RelayStack API
 
 Thank you for your interest in contributing! This document provides guidelines and instructions for contributing to the project.
 
@@ -61,8 +61,8 @@ Feature suggestions are welcome! Please include:
 
 ```bash
 # Clone your fork
-git clone https://github.com/azeezalhajj570-ai/telegram-evolution-api.git
-cd telegram-evolution-api
+git clone https://github.com/azeezalhajj570-ai/relaystack-api.git
+cd relaystack-api
 
 # Create virtual environment
 python3 -m venv .venv && source .venv/bin/activate
