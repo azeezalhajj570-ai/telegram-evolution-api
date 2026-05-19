@@ -4,7 +4,7 @@
 
 **Created**: 2026-05-16
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Add MCP (Model Context Protocol) server support so AI agents can interact with RelayStack API natively through tools like Claude Desktop, Cursor, and other MCP-compatible clients."
 
@@ -149,6 +149,8 @@ As an AI agent user, I want my AI assistant to receive real-time Telegram events
 | `verify_auth_code` | Verify the received login code | `instance_id`, `code` |
 | `submit_2fa` | Submit 2FA password | `instance_id`, `password` |
 | `connect_instance` | Connect an authenticated instance | `instance_id` |
+| `set_instance_api_key` | Generate/rotate an MCP API key for an instance | `instance_id` |
+| `get_scoped_instance` | Return the instance_id scoped to the current API key | — |
 | `configure_webhook` | Set webhook URL for an instance | `instance_id`, `url` |
 | `test_webhook` | Test webhook delivery | `instance_id` |
 | `search_messages` | Search messages in a chat | `instance_id`, `chat_id`, `query`, `limit` |
@@ -163,6 +165,7 @@ As an AI agent user, I want my AI assistant to receive real-time Telegram events
 | `telegram://chats/{id}` | Chat details |
 | `telegram://contacts` | Contact list |
 | `telegram://messages/{chat_id}` | Messages in a specific chat |
+| `telegram://messages/{chat_id}/{message_id}` | Single message details |
 
 ### MCP Prompts
 

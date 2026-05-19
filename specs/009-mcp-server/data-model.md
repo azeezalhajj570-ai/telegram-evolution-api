@@ -48,6 +48,8 @@ MCP is a protocol layer — no new database tables. All data flows through exist
 | `verify_auth_code` | instances | `instance_id: str`, `code: str` | `{"status": "authenticated"}` (or `"awaiting_2fa"`) |
 | `submit_2fa` | instances | `instance_id: str`, `password: str` | `{"status": "authenticated"}` |
 | `connect_instance` | instances | `instance_id: str` | `{"status": "connected"}` |
+| `set_instance_api_key` | instances | `instance_id: str` | `{"instance_id": str, "api_key": str, "status": "created"}` |
+| `get_scoped_instance` | instances | — | `{"instance_id": str \| null}` |
 | `configure_webhook` | webhooks | `instance_id: str`, `url: str` | `{"webhook_id": str, "status": "configured"}` |
 | `test_webhook` | webhooks | `instance_id: str` | `{"status": str, "status_code": int}` |
 

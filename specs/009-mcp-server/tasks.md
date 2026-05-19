@@ -29,15 +29,15 @@ description: "Implementation tasks for MCP Server feature"
 
 **Purpose**: MCP server bootstrap, SDK integration, auth, and transport setup
 
-- [ ] T001 Install `mcp` SDK dependency — add `mcp>=1.0.0` to `pyproject.toml` dependencies, run `pip install -e ".[dev]"`, verify import works with `python -c "import mcp; print(mcp.__version__)"`
-- [ ] T002 [P] Create `app/mcp/__init__.py` — package init with `from app.mcp.server import mcp_app` convenience export
-- [ ] T003 Create `app/mcp/server.py` — instantiate `FastMCP(name="RelayStack", instructions="...")`, define lifespan that initializes DB engine + Redis + telethon_manager, register all tools/resources/prompts, expose `mcp_app` instance. Add `mcp_app.run()` guard for stdio transport
-- [ ] T004 [P] Create `app/mcp/__main__.py` — `if __name__ == "__main__":` block that loads `.env`, calls `mcp_app.run(transport="stdio")`. Entry point: `python -m app.mcp`
-- [ ] T005 [P] Create `app/mcp/auth.py` — API key auth middleware for MCP. For stdio: reads `API_KEYS` from env, stores in-memory. For SSE: FastAPI middleware that validates `X-API-Key` header on each JSON-RPC request, reuses `verify_api_key` from `app.security.api_keys`
-- [ ] T006 Create `app/mcp/errors.py` — error mapping layer. Map Telegram `RPCError` subclasses to MCP error codes per data-model.md error mapping table. Implement `mcp_error_from_telegram(exception) -> dict` that returns MCP-compatible error response
-- [ ] T007 [P] Create `app/mcp/sse.py` — FastAPI app wrapping MCP for SSE transport. Instantiate FastAPI, mount `mcp_app` with SSE handler, add health endpoint. Entry point: `uvicorn app.mcp.sse:app`
-- [ ] T008 [P] Add MCP configuration to `app/config.py` — add `MCP_TRANSPORT: str = "stdio"`, `MCP_HOST: str = "0.0.0.0"`, `MCP_PORT: int = 8001` settings
-- [ ] T009 [P] Create test directory structure — `tests/test_mcp/__init__.py`, `tests/test_mcp/conftest.py` with fixtures: `mcp_app` fixture, stdio transport fixture, SSE test client fixture, mocked Telethon fixtures (reuse from existing `tests/conftest.py`)
+- [x] T001 Install `mcp` SDK dependency — add `mcp>=1.0.0` to `pyproject.toml` dependencies, run `pip install -e ".[dev]"`, verify import works with `python -c "import mcp; print(mcp.__version__)"`
+- [x] T002 [P] Create `app/mcp/__init__.py` — package init with `from app.mcp.server import mcp_app` convenience export
+- [x] T003 Create `app/mcp/server.py` — instantiate `FastMCP(name="RelayStack", instructions="...")`, define lifespan that initializes DB engine + Redis + telethon_manager, register all tools/resources/prompts, expose `mcp_app` instance. Add `mcp_app.run()` guard for stdio transport
+- [x] T004 [P] Create `app/mcp/__main__.py` — `if __name__ == "__main__":` block that loads `.env`, calls `mcp_app.run(transport="stdio")`. Entry point: `python -m app.mcp`
+- [x] T005 [P] Create `app/mcp/auth.py` — API key auth middleware for MCP. For stdio: reads `API_KEYS` from env, stores in-memory. For SSE: FastAPI middleware that validates `X-API-Key` header on each JSON-RPC request, reuses `verify_api_key` from `app.security.api_keys`
+- [x] T006 Create `app/mcp/errors.py` — error mapping layer. Map Telegram `RPCError` subclasses to MCP error codes per data-model.md error mapping table. Implement `mcp_error_from_telegram(exception) -> dict` that returns MCP-compatible error response
+- [x] T007 [P] Create `app/mcp/sse.py` — FastAPI app wrapping MCP for SSE transport. Instantiate FastAPI, mount `mcp_app` with SSE handler, add health endpoint. Entry point: `uvicorn app.mcp.sse:app`
+- [x] T008 [P] Add MCP configuration to `app/config.py` — add `MCP_TRANSPORT: str = "stdio"`, `MCP_HOST: str = "0.0.0.0"`, `MCP_PORT: int = 8001` settings
+- [x] T009 [P] Create test directory structure — `tests/test_mcp/__init__.py`, `tests/test_mcp/conftest.py` with fixtures: `mcp_app` fixture, stdio transport fixture, SSE test client fixture, mocked Telethon fixtures (reuse from existing `tests/conftest.py`)
 
 **Checkpoint**: MCP server starts with `python -m app.mcp`, advertises 0 tools (empty registry), accepts stdio JSON-RPC connection
 
@@ -51,17 +51,17 @@ description: "Implementation tasks for MCP Server feature"
 
 ### Tests for User Story 1 (MANDATORY) ⚠️
 
-- [ ] T010 [P] [US1] Unit test for tool registration discovery — in `tests/test_mcp/test_discovery.py`, test that all 28 tools are registered and `tools/list` returns them with correct names and descriptions
-- [ ] T011 [P] [US1] Contract test for tool schemas — verify each tool's `inputSchema` has correct required parameters, types, min/max constraints per contracts/tools.md
-- [ ] T012 [P] [US1] Transport test for stdio — launch MCP server as subprocess with stdio transport, send `tools/list` JSON-RPC, verify response
-- [ ] T013 [P] [US1] Transport test for SSE — start SSE server with test client, POST JSON-RPC to `/mcp`, verify `tools/list` response
-- [ ] T014 [US1] Auth test — verify unauthenticated requests return MCP auth error, valid API key succeeds
+- [x] T010 [P] [US1] Unit test for tool registration discovery — in `tests/test_mcp/test_discovery.py`, test that all 28 tools are registered and `tools/list` returns them with correct names and descriptions
+- [x] T011 [P] [US1] Contract test for tool schemas — verify each tool's `inputSchema` has correct required parameters, types, min/max constraints per contracts/tools.md
+- [x] T012 [P] [US1] Transport test for stdio — launch MCP server as subprocess with stdio transport, send `tools/list` JSON-RPC, verify response
+- [x] T013 [P] [US1] Transport test for SSE — start SSE server with test client, POST JSON-RPC to `/mcp`, verify `tools/list` response
+- [x] T014 [US1] Auth test — verify unauthenticated requests return MCP auth error, valid API key succeeds
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Create base tool registry in `app/mcp/server.py` — implement `_register_all_tools()` that calls all domain tool registration functions
-- [ ] T016 [P] [US1] Implement `app/mcp/auth.py` `authenticated` wrapper — decorator that verifies API key on each tool call for stdio (env-based) and SSE (header-based). Raise `ValueError` with MCP error code on failure
-- [ ] T017 [P] [US1] Add lifespan to `app/mcp/server.py` — on startup: create DB engine + session factory, init Redis, import TelegramClientManager, reconnect instances. On shutdown: close all connections. Reuse existing `app.db.database` and `app.services.telegram_manager`
+- [x] T015 [P] [US1] Create base tool registry in `app/mcp/server.py` — implement `_register_all_tools()` that calls all domain tool registration functions
+- [x] T016 [P] [US1] Implement `app/mcp/auth.py` `authenticated` wrapper — decorator that verifies API key on each tool call for stdio (env-based) and SSE (header-based). Raise `ValueError` with MCP error code on failure
+- [x] T017 [P] [US1] Add lifespan to `app/mcp/server.py` — on startup: create DB engine + session factory, init Redis, import TelegramClientManager, reconnect instances. On shutdown: close all connections. Reuse existing `app.db.database` and `app.services.telegram_manager`
 
 **Checkpoint**: All 28 tools discoverable from any MCP client with correct schemas — server ready for tool implementation
 
@@ -75,17 +75,17 @@ description: "Implementation tasks for MCP Server feature"
 
 ### Tests for User Story 2 (MANDATORY) ⚠️
 
-- [ ] T018 [P] [US2] Unit test for `send_message` tool — in `tests/test_mcp/test_tools_messaging.py`, mock `messaging.send_message`, call tool with valid params, verify correct service call
-- [ ] T019 [P] [US2] Unit test for `send_media` tool — mock Telethon send_file, call tool, verify
-- [ ] T020 [P] [US2] Unit test for `get_messages` tool — mock `chats.get_messages`, call tool, verify pagination params
-- [ ] T021 [P] [US2] Unit test for `reply_message`, `forward_message`, `edit_message`, `delete_message`, `add_reaction` — one test per tool, verify service delegation
-- [ ] T022 [US2] Integration test — full tool call from MCP JSON-RPC to mocked Telethon response, verify output format matches contract
+- [x] T018 [P] [US2] Unit test for `send_message` tool — in `tests/test_mcp/test_tools_messaging.py`, mock `messaging.send_message`, call tool with valid params, verify correct service call
+- [x] T019 [P] [US2] Unit test for `send_media` tool — mock Telethon send_file, call tool, verify
+- [x] T020 [P] [US2] Unit test for `get_messages` tool — mock `chats.get_messages`, call tool, verify pagination params
+- [x] T021 [P] [US2] Unit test for `reply_message`, `forward_message`, `edit_message`, `delete_message`, `add_reaction` — one test per tool, verify service delegation
+- [x] T022 [US2] Integration test — full tool call from MCP JSON-RPC to mocked Telethon response, verify output format matches contract
 
 ### Implementation for User Story 2
 
-- [ ] T023 [P] [US2] Create `app/mcp/tools/__init__.py` — package init, domain tool registration stubs
-- [ ] T024 [US2] Create `app/mcp/tools/messaging.py` — implement `register_messaging_tools(mcp)` that registers: `send_message`, `send_media`, `get_messages`, `reply_message`, `forward_message`, `edit_message`, `delete_message`, `add_reaction`. Each tool function calls existing `app.services.messaging` or `app.services.chats` methods and wraps errors via `app.mcp.errors`
-- [ ] T025 [US2] Wire messaging tools in `app/mcp/server.py` — call `register_messaging_tools(mcp_app)` in `_register_all_tools()`
+- [x] T023 [P] [US2] Create `app/mcp/tools/__init__.py` — package init, domain tool registration stubs
+- [x] T024 [US2] Create `app/mcp/tools/messaging.py` — implement `register_messaging_tools(mcp)` that registers: `send_message`, `send_media`, `get_messages`, `reply_message`, `forward_message`, `edit_message`, `delete_message`, `add_reaction`. Each tool function calls existing `app.services.messaging` or `app.services.chats` methods and wraps errors via `app.mcp.errors`
+- [x] T025 [US2] Wire messaging tools in `app/mcp/server.py` — call `register_messaging_tools(mcp_app)` in `_register_all_tools()`
 
 **Checkpoint**: 8 messaging tools operational — AI agent can fully manage messages through natural language
 
@@ -99,18 +99,18 @@ description: "Implementation tasks for MCP Server feature"
 
 ### Tests for User Story 3 (MANDATORY) ⚠️
 
-- [ ] T026 [P] [US3] Unit tests for chat tools — `list_chats`, `get_chat_info`, `search_messages` in `tests/test_mcp/test_tools_chats.py`
-- [ ] T027 [P] [US3] Unit tests for contact tools — `list_contacts`, `import_contact`, `delete_contact` in `tests/test_mcp/test_tools_contacts.py`
-- [ ] T028 [P] [US3] Unit tests for group tools — `list_groups`, `create_group`, `add_group_member`, `remove_group_member` in `tests/test_mcp/test_tools_groups.py`
-- [ ] T029 [P] [US3] Unit tests for channel tools — `list_channels`, `join_channel`, `leave_channel` in `tests/test_mcp/test_tools_channels.py`
+- [x] T026 [P] [US3] Unit tests for chat tools — `list_chats`, `get_chat_info`, `search_messages` in `tests/test_mcp/test_tools_chats.py`
+- [x] T027 [P] [US3] Unit tests for contact tools — `list_contacts`, `import_contact`, `delete_contact` in `tests/test_mcp/test_tools_contacts.py`
+- [x] T028 [P] [US3] Unit tests for group tools — `list_groups`, `create_group`, `add_group_member`, `remove_group_member` in `tests/test_mcp/test_tools_groups.py`
+- [x] T029 [P] [US3] Unit tests for channel tools — `list_channels`, `join_channel`, `leave_channel` in `tests/test_mcp/test_tools_channels.py`
 
 ### Implementation for User Story 3
 
-- [ ] T030 [P] [US3] Create `app/mcp/tools/chats.py` — implement `register_chat_tools(mcp)` with `list_chats`, `get_chat_info`, `search_messages`. Delegate to existing `app.services.chats`
-- [ ] T031 [P] [US3] Create `app/mcp/tools/contacts.py` — implement `register_contact_tools(mcp)` with `list_contacts`, `import_contact`, `delete_contact`. Use Telethon `GetContactsRequest`, `ImportContactsRequest`, `DeleteContactsRequest` directly
-- [ ] T032 [P] [US3] Create `app/mcp/tools/groups.py` — implement `register_group_tools(mcp)` with `list_groups`, `create_group`, `add_group_member`, `remove_group_member`
-- [ ] T033 [P] [US3] Create `app/mcp/tools/channels.py` — implement `register_channel_tools(mcp)` with `list_channels`, `join_channel`, `leave_channel`
-- [ ] T034 Wire chat/contact/group/channel tools in server — import and call all four registration functions from `app/mcp/server.py`
+- [x] T030 [P] [US3] Create `app/mcp/tools/chats.py` — implement `register_chat_tools(mcp)` with `list_chats`, `get_chat_info`, `search_messages`. Delegate to existing `app.services.chats`
+- [x] T031 [P] [US3] Create `app/mcp/tools/contacts.py` — implement `register_contact_tools(mcp)` with `list_contacts`, `import_contact`, `delete_contact`. Use Telethon `GetContactsRequest`, `ImportContactsRequest`, `DeleteContactsRequest` directly
+- [x] T032 [P] [US3] Create `app/mcp/tools/groups.py` — implement `register_group_tools(mcp)` with `list_groups`, `create_group`, `add_group_member`, `remove_group_member`
+- [x] T033 [P] [US3] Create `app/mcp/tools/channels.py` — implement `register_channel_tools(mcp)` with `list_channels`, `join_channel`, `leave_channel`
+- [x] T034 Wire chat/contact/group/channel tools in server — import and call all four registration functions from `app/mcp/server.py`
 
 **Checkpoint**: 14 additional tools operational (22 total) — AI agent can manage contacts, chats, groups, and channels
 
@@ -124,15 +124,15 @@ description: "Implementation tasks for MCP Server feature"
 
 ### Tests for User Story 4 (MANDATORY) ⚠️
 
-- [ ] T035 [P] [US4] Unit tests for instance management tools — `create_instance`, `list_instances`, `get_instance_status` in `tests/test_mcp/test_tools_instances.py`
-- [ ] T036 [P] [US4] Unit tests for auth flow tools — `send_auth_code`, `verify_auth_code`, `submit_2fa`, `connect_instance` in `tests/test_mcp/test_tools_auth.py`
-- [ ] T037 [P] [US4] Integration test — full auth flow via MCP tools (create → send_code → verify → connect), mocked Telethon, verify instance status transitions
+- [x] T035 [P] [US4] Unit tests for instance management tools — `create_instance`, `list_instances`, `get_instance_status` in `tests/test_mcp/test_tools_instances.py`
+- [x] T036 [P] [US4] Unit tests for auth flow tools — `send_auth_code`, `verify_auth_code`, `submit_2fa`, `connect_instance` in `tests/test_mcp/test_tools_auth.py`
+- [x] T037 [P] [US4] Integration test — full auth flow via MCP tools (create → send_code → verify → connect), mocked Telethon, verify instance status transitions
 
 ### Implementation for User Story 4
 
-- [ ] T038 [P] [US4] Create `app/mcp/tools/instances.py` — implement `register_instance_tools(mcp)` with `create_instance`, `list_instances`, `get_instance_status`, `send_auth_code`, `verify_auth_code`, `submit_2fa`, `connect_instance`. Delegate to `app.services.telegram_auth` and `app.db.repositories.InstanceRepository`
-- [ ] T039 [P] [US4] Create `app/mcp/tools/webhooks.py` — implement `register_webhook_tools(mcp)` with `configure_webhook`, `test_webhook`. Delegate to existing webhook services
-- [ ] T040 Wire instance + webhook tools in server — import and call registration functions from `app/mcp/server.py`
+- [x] T038 [P] [US4] Create `app/mcp/tools/instances.py` — implement `register_instance_tools(mcp)` with `create_instance`, `list_instances`, `get_instance_status`, `send_auth_code`, `verify_auth_code`, `submit_2fa`, `connect_instance`. Delegate to `app.services.telegram_auth` and `app.db.repositories.InstanceRepository`
+- [x] T039 [P] [US4] Create `app/mcp/tools/webhooks.py` — implement `register_webhook_tools(mcp)` with `configure_webhook`, `test_webhook`. Delegate to existing webhook services
+- [x] T040 Wire instance + webhook tools in server — import and call registration functions from `app/mcp/server.py`
 
 **Checkpoint**: 9 additional tools operational (31 total including webhooks) — full instance lifecycle manageable through AI
 
@@ -146,17 +146,17 @@ description: "Implementation tasks for MCP Server feature"
 
 ### Tests (MANDATORY) ⚠️
 
-- [ ] T041 [P] [US3/4] Unit tests for resource handlers — `tests/test_mcp/test_resources.py`, test all 7 resource URIs
-- [ ] T042 [P] [US4] Test resource content format — verify response has correct `uri`, `mimeType`, `name`, `description`, `text` fields
+- [x] T041 [P] [US3/4] Unit tests for resource handlers — `tests/test_mcp/test_resources.py`, test all 7 resource URIs
+- [x] T042 [P] [US4] Test resource content format — verify response has correct `uri`, `mimeType`, `name`, `description`, `text` fields
 
 ### Implementation
 
-- [ ] T043 [P] Create `app/mcp/resources/__init__.py` — package init
-- [ ] T044 [P] Create `app/mcp/resources/instances.py` — `register_instance_resources(mcp)` with `telegram://instances` and `telegram://instances/{instance_id}` handlers. Fetch via `InstanceRepository`
-- [ ] T045 [P] Create `app/mcp/resources/chats.py` — `register_chat_resources(mcp)` with `telegram://chats` and `telegram://chats/{chat_id}` handlers. Fetch via `app.services.chats`
-- [ ] T046 [P] Create `app/mcp/resources/contacts.py` — `register_contact_resources(mcp)` with `telegram://contacts` handler
-- [ ] T047 [P] Create `app/mcp/resources/messages.py` — `register_message_resources(mcp)` with `telegram://messages/{chat_id}` and `telegram://messages/{chat_id}/{message_id}` handlers
-- [ ] T048 Wire all resource registrations in `app/mcp/server.py`
+- [x] T043 [P] Create `app/mcp/resources/__init__.py` — package init
+- [x] T044 [P] Create `app/mcp/resources/instances.py` — `register_instance_resources(mcp)` with `telegram://instances` and `telegram://instances/{instance_id}` handlers. Fetch via `InstanceRepository`
+- [x] T045 [P] Create `app/mcp/resources/chats.py` — `register_chat_resources(mcp)` with `telegram://chats` and `telegram://chats/{chat_id}` handlers. Fetch via `app.services.chats`
+- [x] T046 [P] Create `app/mcp/resources/contacts.py` — `register_contact_resources(mcp)` with `telegram://contacts` handler
+- [x] T047 [P] Create `app/mcp/resources/messages.py` — `register_message_resources(mcp)` with `telegram://messages/{chat_id}` and `telegram://messages/{chat_id}/{message_id}` handlers
+- [x] T048 Wire all resource registrations in `app/mcp/server.py`
 
 **Checkpoint**: 7 resources operational — AI agents can read Telegram data as structured content
 
@@ -170,13 +170,13 @@ description: "Implementation tasks for MCP Server feature"
 
 ### Tests (MANDATORY) ⚠️
 
-- [ ] T049 [P] Unit tests for prompts — `tests/test_mcp/test_prompts.py`, test all 3 prompts with valid/invalid arguments
+- [x] T049 [P] Unit tests for prompts — `tests/test_mcp/test_prompts.py`, test all 3 prompts with valid/invalid arguments
 
 ### Implementation
 
-- [ ] T050 [P] Create `app/mcp/prompts/__init__.py` — package init
-- [ ] T051 [P] Create `app/mcp/prompts/templates.py` — `register_prompts(mcp)` with `compose_message`, `summarize_chat`, `draft_reply` using `@mcp.prompt()` decorator. Each returns `Message` list with role and content
-- [ ] T052 Wire prompts in `app/mcp/server.py`
+- [x] T050 [P] Create `app/mcp/prompts/__init__.py` — package init
+- [x] T051 [P] Create `app/mcp/prompts/templates.py` — `register_prompts(mcp)` with `compose_message`, `summarize_chat`, `draft_reply` using `@mcp.prompt()` decorator. Each returns `Message` list with role and content
+- [x] T052 Wire prompts in `app/mcp/server.py`
 
 **Checkpoint**: 3 prompt templates operational — AI agents can use pre-built workflow templates
 
@@ -186,17 +186,17 @@ description: "Implementation tasks for MCP Server feature"
 
 **Purpose**: Error handling, documentation, configuration, testing
 
-- [ ] T053 [P] Add comprehensive error handling in `app/mcp/errors.py` — ensure all Telegram RPCError subclasses are mapped, add fallback for unknown errors, test error mapping
-- [ ] T054 [P] Add logging to all tools — structured logging with tool name, params (no sensitive data), duration, error status. Use existing `logger`
-- [ ] T055 [P] Add resource caching — cache instance list response for 30s to reduce DB load on repeated reads, use Redis or in-memory TTL cache
-- [ ] T056 [P] Add response size limits — truncate large message lists to configured max (default 100), return warning in response
-- [ ] T057 [P] Add SSE transport health checks — `GET /health` returns MCP server status, connected instance count, uptime
-- [ ] T058 [P] Add stdio process health — heartbeat/ping handler, graceful shutdown on SIGTERM
-- [ ] T059 [P] Update `README.md` — add MCP server section with configuration examples for Claude Desktop, Cursor, VS Code
-- [ ] T060 [P] Add MCP environment variables to `.env.example` — `MCP_TRANSPORT`, `MCP_HOST`, `MCP_PORT`
-- [ ] T061 [P] Add MCP section to `API_EXAMPLES.md` — curl examples for SSE transport, Claude Desktop config example
-- [ ] T062 [P] Create `tests/test_mcp/test_transport_sse.py` — full SSE protocol integration test with FastAPI TestClient
-- [ ] T063 [P] Create `tests/test_mcp/test_transport_stdio.py` — subprocess stdio test, verify JSON-RPC handshake
+- [x] T053 [P] Add comprehensive error handling in `app/mcp/errors.py` — ensure all Telegram RPCError subclasses are mapped, add fallback for unknown errors, test error mapping
+- [x] T054 [P] Add logging to all tools — structured logging with tool name, params (no sensitive data), duration, error status. Use existing `logger`
+- [x] T055 [P] Add resource caching — cache instance list response for 30s to reduce DB load on repeated reads, use Redis or in-memory TTL cache
+- [x] T056 [P] Add response size limits — truncate large message lists to configured max (default 100), return warning in response
+- [x] T057 [P] Add SSE transport health checks — `GET /health` returns MCP server status, connected instance count, uptime
+- [x] T058 [P] Add stdio process health — heartbeat/ping handler, graceful shutdown on SIGTERM
+- [x] T059 [P] Update `README.md` — add MCP server section with configuration examples for Claude Desktop, Cursor, VS Code
+- [x] T060 [P] Add MCP environment variables to `.env.example` — `MCP_TRANSPORT`, `MCP_HOST`, `MCP_PORT`
+- [x] T061 [P] Add MCP section to `API_EXAMPLES.md` — curl examples for SSE transport, Claude Desktop config example
+- [x] T062 [P] Create `tests/test_mcp/test_transport_sse.py` — full SSE protocol integration test with FastAPI TestClient
+- [x] T063 [P] Create `tests/test_mcp/test_transport_stdio.py` — subprocess stdio test, verify JSON-RPC handshake
 
 ---
 

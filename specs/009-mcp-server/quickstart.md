@@ -2,18 +2,15 @@
 
 ## Prerequisites
 
-- Python 3.12+
+- Python 3.10+ (MCP SDK requires 3.10+)
 - Running RelayStack API instance (PostgreSQL + Redis)
 - API key for authentication
-- MCP-compatible client (Claude Desktop, Cursor, VS Code, etc.)
+- MCP-compatible client (Claude Desktop, Cursor, VS Code, n8n, etc.)
 
 ## Installation
 
 ```bash
-# Install MCP SDK
-pip install "mcp>=1.0.0"
-
-# Or install full dev environment
+# Install full dev environment
 pip install -e ".[dev]"
 ```
 
@@ -22,15 +19,29 @@ pip install -e ".[dev]"
 ### Stdio Transport (for local AI clients)
 
 ```bash
-python -m app.mcp
+python3.11 -m app.mcp
 ```
 
 This starts the MCP server on stdin/stdout. It reads the same `.env` file as the HTTP API.
 
-### SSE Transport (for remote clients)
+### SSE Transport (for remote clients via Docker)
 
 ```bash
-uvicorn app.mcp.sse:app --host 0.0.0.0 --port 8001
+uvicorn app.mcp.sse:sse_app --host 0.0.0.0 --port 8001
+```
+
+## Docker Compose (Production)
+
+```yaml
+services:
+  app:
+    # existing HTTP API service
+  mcp-sse:
+    build: .
+    ports:
+      - "127.0.0.1:3011:8001"
+    env_file: .env
+    command: ["uvicorn", "app.mcp.sse:sse_app", "--host", "0.0.0.0", "--port", "8001"]
 ```
 
 ## Claude Desktop Configuration
@@ -41,12 +52,12 @@ Add to `claude_desktop_config.json`:
 {
   "mcpServers": {
     "relaystack": {
-      "command": "python",
+      "command": "python3.11",
       "args": ["-m", "app.mcp"],
       "env": {
         "DATABASE_URL": "postgresql+asyncpg://user:pass@localhost:5432/telegram_gateway",
-        "REDIS_URL": "redis://localhost:6379/0",
         "API_KEYS": "your-api-key",
+        "MCP_API_KEY": "your-mcp-api-key",
         "TELEGRAM_API_ID": "123456",
         "TELEGRAM_API_HASH": "your-api-hash"
       }
@@ -55,52 +66,39 @@ Add to `claude_desktop_config.json`:
 }
 ```
 
-## Docker Compose (Sidecar)
+## n8n MCP Node Configuration
 
-```yaml
-services:
-  app:
-    # existing HTTP API
-  mcp:
-    build: .
-    command: uvicorn app.mcp.sse:app --host 0.0.0.0 --port 8001
-    env_file: .env
-    ports:
-      - "8001:8001"
-    depends_on:
-      - postgres
-      - redis
 ```
+URL: https://tele.dev.hamedco.com/sse
+Transport: SSE
+Headers:
+  X-API-Key: <global-or-instance-api-key>
+  X-Instance-Id: <optional-instance-uuid>
+```
+
+## Authentication
+
+Two API key modes:
+
+| Mode | Key Source | Scope |
+|------|-----------|-------|
+| **Global** | `API_KEYS` env var | Access all instances (must pass `instance_id` in tools) |
+| **Instance-scoped** | Generated via `set_instance_api_key` tool | Auto-scoped to one instance |
+
+Headers: `X-API-Key`, `Authorization: Bearer <key>`, or `api_key` query param.
 
 ## Verify Setup
 
 ```bash
-# Check MCP server is running (SSE)
-curl http://localhost:8001/health
+# Health check
+curl https://tele.dev.hamedco.com/health
 
-# List available tools (via SSE)
-curl -X POST http://localhost:8001/mcp \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: your-api-key" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
-
-# Call a tool
-curl -X POST http://localhost:8001/mcp \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: your-api-key" \
-  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_instances","arguments":{}}}'
+# SSE stream (returns session endpoint)
+curl -H "X-API-Key: your-key" https://tele.dev.hamedco.com/sse
 ```
 
-## Run Tests
+## Tests
 
 ```bash
-# All MCP tests
-pytest tests/test_mcp/ -v
-
-# Specific domain
-pytest tests/test_mcp/test_tools_messaging.py -v
-
-# Transport tests
-pytest tests/test_mcp/test_transport_stdio.py -v
-pytest tests/test_mcp/test_transport_sse.py -v
+python3.11 -m pytest tests/test_mcp/ -v
 ```
