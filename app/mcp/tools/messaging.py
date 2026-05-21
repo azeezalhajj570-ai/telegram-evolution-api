@@ -1,10 +1,22 @@
 import uuid
+from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
 from telethon.errors import FloodWaitError
 
+from app.mcp.context import resolve_instance_id
 from app.mcp.errors import mcp_error_from_telegram
 from app.services.messaging import send_message as svc_send_message
+
+
+def _require_instance_id(instance_id: Optional[str]) -> str:
+    resolved = resolve_instance_id(instance_id)
+    if not resolved:
+        raise ValueError(
+            "Instance ID required — pass as a parameter, x-instance-id header, "
+            "or use an instance-scoped API key"
+        )
+    return resolved
 
 
 def register_messaging_tools(mcp: FastMCP):
@@ -13,12 +25,13 @@ def register_messaging_tools(mcp: FastMCP):
         description="Send a text message to a Telegram chat",
     )
     async def send_message(
-        instance_id: str,
         chat_id: int,
         text: str,
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         try:
-            result = await svc_send_message(uuid.UUID(instance_id), text, chat_id=chat_id)
+            result = await svc_send_message(uuid.UUID(resolved_id), text, chat_id=chat_id)
             return result
         except (ValueError, FloodWaitError) as e:
             raise ValueError(mcp_error_from_telegram(e)["message"])
@@ -28,15 +41,16 @@ def register_messaging_tools(mcp: FastMCP):
         description="Send a photo, document, or video to a Telegram chat",
     )
     async def send_media(
-        instance_id: str,
         chat_id: int,
         file_path: str,
         caption: str = "",
         media_type: str = "photo",
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
 
-        client = client_manager.get_client(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -53,15 +67,16 @@ def register_messaging_tools(mcp: FastMCP):
         description="Get recent messages from a Telegram chat",
     )
     async def get_messages(
-        instance_id: str,
         chat_id: int,
         limit: int = 20,
         offset: int = 0,
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         from app.services.chats import get_messages as svc_get_messages
 
         try:
-            messages = await svc_get_messages(uuid.UUID(instance_id), chat_id, limit=limit, offset_id=offset or None)
+            messages = await svc_get_messages(uuid.UUID(resolved_id), chat_id, limit=limit, offset_id=offset)
             return {"messages": messages}
         except ValueError as e:
             raise ValueError(mcp_error_from_telegram(e)["message"])
@@ -71,14 +86,15 @@ def register_messaging_tools(mcp: FastMCP):
         description="Reply to a specific message in a Telegram chat",
     )
     async def reply_message(
-        instance_id: str,
         chat_id: int,
         reply_to_msg_id: int,
         text: str,
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
 
-        client = client_manager.get_client(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -95,14 +111,15 @@ def register_messaging_tools(mcp: FastMCP):
         description="Forward a message from one chat to another",
     )
     async def forward_message(
-        instance_id: str,
         from_chat_id: int,
         to_chat_id: int,
         message_id: int,
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
 
-        client = client_manager.get_client(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -119,14 +136,15 @@ def register_messaging_tools(mcp: FastMCP):
         description="Edit a previously sent message in a Telegram chat",
     )
     async def edit_message(
-        instance_id: str,
         chat_id: int,
         message_id: int,
         text: str,
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
 
-        client = client_manager.get_client(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -143,13 +161,14 @@ def register_messaging_tools(mcp: FastMCP):
         description="Delete a message from a Telegram chat",
     )
     async def delete_message(
-        instance_id: str,
         chat_id: int,
         message_id: int,
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
 
-        client = client_manager.get_client(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -166,14 +185,15 @@ def register_messaging_tools(mcp: FastMCP):
         description="Add an emoji reaction to a message in a Telegram chat",
     )
     async def add_reaction(
-        instance_id: str,
         chat_id: int,
         message_id: int,
         emoji: str,
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
 
-        client = client_manager.get_client(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 

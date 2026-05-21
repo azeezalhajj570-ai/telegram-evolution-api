@@ -22,7 +22,11 @@ async def send_message(
 
     try:
         if chat_id is not None:
-            entity = chat_id
+            try:
+                entity = await client.get_entity(chat_id)
+            except (ValueError, TypeError):
+                await client.get_dialogs()
+                entity = await client.get_entity(chat_id)
             resolved_id = chat_id
         elif username is not None:
             entity = await client.get_entity(username)

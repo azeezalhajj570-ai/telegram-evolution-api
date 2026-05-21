@@ -1,8 +1,21 @@
+from typing import Optional
+
 from mcp.server.fastmcp import FastMCP
 from telethon.tl.functions.channels import JoinChannelRequest, LeaveChannelRequest
 
+from app.mcp.context import resolve_instance_id
 from app.mcp.errors import mcp_error_from_telegram
 from app.services.telegram_manager import client_manager
+
+
+def _require_instance_id(instance_id: Optional[str]) -> str:
+    resolved = resolve_instance_id(instance_id)
+    if not resolved:
+        raise ValueError(
+            "Instance ID required — pass as a parameter, x-instance-id header, "
+            "or use an instance-scoped API key"
+        )
+    return resolved
 
 
 def register_channel_tools(mcp: FastMCP):
@@ -11,9 +24,10 @@ def register_channel_tools(mcp: FastMCP):
         description="List all Telegram channels the user follows",
     )
     async def list_channels(
-        instance_id: str,
+        instance_id: Optional[str] = None,
     ) -> dict:
-        client = client_manager.get_client(instance_id)
+        resolved_id = _require_instance_id(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -37,10 +51,11 @@ def register_channel_tools(mcp: FastMCP):
         description="Join a Telegram channel by its ID or username",
     )
     async def join_channel(
-        instance_id: str,
         channel_id: int,
+        instance_id: Optional[str] = None,
     ) -> dict:
-        client = client_manager.get_client(instance_id)
+        resolved_id = _require_instance_id(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -55,10 +70,11 @@ def register_channel_tools(mcp: FastMCP):
         description="Leave a Telegram channel",
     )
     async def leave_channel(
-        instance_id: str,
         channel_id: int,
+        instance_id: Optional[str] = None,
     ) -> dict:
-        client = client_manager.get_client(instance_id)
+        resolved_id = _require_instance_id(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 

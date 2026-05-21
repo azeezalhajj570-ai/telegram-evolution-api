@@ -1,9 +1,22 @@
+from typing import Optional
+
 from mcp.server.fastmcp import FastMCP
 from telethon.tl.functions.contacts import DeleteContactsRequest, ImportContactsRequest
 from telethon.tl.types import InputPhoneContact
 
+from app.mcp.context import resolve_instance_id
 from app.mcp.errors import mcp_error_from_telegram
 from app.services.telegram_manager import client_manager
+
+
+def _require_instance_id(instance_id: Optional[str]) -> str:
+    resolved = resolve_instance_id(instance_id)
+    if not resolved:
+        raise ValueError(
+            "Instance ID required — pass as a parameter, x-instance-id header, "
+            "or use an instance-scoped API key"
+        )
+    return resolved
 
 
 def register_contact_tools(mcp: FastMCP):
@@ -12,10 +25,11 @@ def register_contact_tools(mcp: FastMCP):
         description="List all Telegram contacts for an instance",
     )
     async def list_contacts(
-        instance_id: str,
         limit: int = 100,
+        instance_id: Optional[str] = None,
     ) -> dict:
-        client = client_manager.get_client(instance_id)
+        resolved_id = _require_instance_id(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -44,12 +58,13 @@ def register_contact_tools(mcp: FastMCP):
         description="Import a contact by phone number into Telegram",
     )
     async def import_contact(
-        instance_id: str,
         phone: str,
         first_name: str,
         last_name: str = "",
+        instance_id: Optional[str] = None,
     ) -> dict:
-        client = client_manager.get_client(instance_id)
+        resolved_id = _require_instance_id(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -83,10 +98,11 @@ def register_contact_tools(mcp: FastMCP):
         description="Delete a contact from Telegram",
     )
     async def delete_contact(
-        instance_id: str,
         contact_id: int,
+        instance_id: Optional[str] = None,
     ) -> dict:
-        client = client_manager.get_client(instance_id)
+        resolved_id = _require_instance_id(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 

@@ -1,8 +1,21 @@
+from typing import Optional
+
 from mcp.server.fastmcp import FastMCP
 from telethon.tl.functions.messages import AddChatUserRequest, CreateChatRequest, DeleteChatUserRequest
 
+from app.mcp.context import resolve_instance_id
 from app.mcp.errors import mcp_error_from_telegram
 from app.services.telegram_manager import client_manager
+
+
+def _require_instance_id(instance_id: Optional[str]) -> str:
+    resolved = resolve_instance_id(instance_id)
+    if not resolved:
+        raise ValueError(
+            "Instance ID required — pass as a parameter, x-instance-id header, "
+            "or use an instance-scoped API key"
+        )
+    return resolved
 
 
 def register_group_tools(mcp: FastMCP):
@@ -11,9 +24,10 @@ def register_group_tools(mcp: FastMCP):
         description="List all Telegram groups the user is a member of",
     )
     async def list_groups(
-        instance_id: str,
+        instance_id: Optional[str] = None,
     ) -> dict:
-        client = client_manager.get_client(instance_id)
+        resolved_id = _require_instance_id(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -36,11 +50,12 @@ def register_group_tools(mcp: FastMCP):
         description="Create a new Telegram group",
     )
     async def create_group(
-        instance_id: str,
         title: str,
         member_ids: str = "",
+        instance_id: Optional[str] = None,
     ) -> dict:
-        client = client_manager.get_client(instance_id)
+        resolved_id = _require_instance_id(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -59,11 +74,12 @@ def register_group_tools(mcp: FastMCP):
         description="Add a member to a Telegram group",
     )
     async def add_group_member(
-        instance_id: str,
         group_id: int,
         user_id: int,
+        instance_id: Optional[str] = None,
     ) -> dict:
-        client = client_manager.get_client(instance_id)
+        resolved_id = _require_instance_id(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -82,11 +98,12 @@ def register_group_tools(mcp: FastMCP):
         description="Remove a member from a Telegram group",
     )
     async def remove_group_member(
-        instance_id: str,
         group_id: int,
         user_id: int,
+        instance_id: Optional[str] = None,
     ) -> dict:
-        client = client_manager.get_client(instance_id)
+        resolved_id = _require_instance_id(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 

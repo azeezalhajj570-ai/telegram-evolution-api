@@ -31,7 +31,12 @@ async def get_messages(instance_id: uuid.UUID, chat_id: int, limit: int = 50, of
     if client is None or not client.is_connected():
         raise ValueError("Instance not connected")
 
-    messages = await client.get_messages(chat_id, limit=limit, offset_id=offset_id)
+    try:
+        entity = await client.get_entity(chat_id)
+    except (ValueError, TypeError):
+        await client.get_dialogs()
+        entity = await client.get_entity(chat_id)
+    messages = await client.get_messages(entity, limit=limit, offset_id=offset_id or 0)
     return [
         {
             "message_id": m.id,

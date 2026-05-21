@@ -1,9 +1,21 @@
 import uuid
+from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
 
+from app.mcp.context import resolve_instance_id
 from app.mcp.errors import mcp_error_from_telegram
 from app.services.chats import list_chats as svc_list_chats
+
+
+def _require_instance_id(instance_id: Optional[str]) -> str:
+    resolved = resolve_instance_id(instance_id)
+    if not resolved:
+        raise ValueError(
+            "Instance ID required — pass as a parameter, x-instance-id header, "
+            "or use an instance-scoped API key"
+        )
+    return resolved
 
 
 def register_chat_tools(mcp: FastMCP):
@@ -12,12 +24,13 @@ def register_chat_tools(mcp: FastMCP):
         description="List recent Telegram chats for an instance",
     )
     async def list_chats(
-        instance_id: str,
         limit: int = 50,
         offset: int = 0,
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         try:
-            chats = await svc_list_chats(uuid.UUID(instance_id))
+            chats = await svc_list_chats(uuid.UUID(resolved_id))
             if limit:
                 chats = chats[offset or 0:offset or 0 + limit]
             return {"chats": chats}
@@ -29,12 +42,13 @@ def register_chat_tools(mcp: FastMCP):
         description="Get details about a specific Telegram chat",
     )
     async def get_chat_info(
-        instance_id: str,
         chat_id: int,
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
 
-        client = client_manager.get_client(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
@@ -58,14 +72,15 @@ def register_chat_tools(mcp: FastMCP):
         description="Search messages in a Telegram chat by query text",
     )
     async def search_messages(
-        instance_id: str,
         chat_id: int,
         query: str,
         limit: int = 20,
+        instance_id: Optional[str] = None,
     ) -> dict:
+        resolved_id = _require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
 
-        client = client_manager.get_client(instance_id)
+        client = client_manager.get_client(resolved_id)
         if client is None or not client.is_connected():
             raise ValueError("Instance not connected")
 
