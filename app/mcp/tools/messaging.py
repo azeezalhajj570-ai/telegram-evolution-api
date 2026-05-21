@@ -2,213 +2,94 @@ import uuid
 from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
-from telethon.errors import FloodWaitError
 
-from app.mcp.context import resolve_instance_id
-from app.mcp.errors import mcp_error_from_telegram
+from app.mcp.handler import create_handler, require_instance_id
 from app.services.messaging import send_message as svc_send_message
 
 
-def _require_instance_id(instance_id: Optional[str]) -> str:
-    resolved = resolve_instance_id(instance_id)
-    if not resolved:
-        raise ValueError(
-            "Instance ID required — pass as a parameter, x-instance-id header, "
-            "or use an instance-scoped API key"
-        )
-    return resolved
-
-
 def register_messaging_tools(mcp: FastMCP):
-    @mcp.tool(
-        name="send_message",
-        description="Send a text message to a Telegram chat",
-    )
-    async def send_message(
-        chat_id: int,
-        text: str,
-        instance_id: Optional[str] = None,
-    ) -> dict:
-        resolved_id = _require_instance_id(instance_id)
-        try:
-            result = await svc_send_message(uuid.UUID(resolved_id), text, chat_id=chat_id)
-            return result
-        except (ValueError, FloodWaitError) as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
 
-    @mcp.tool(
-        name="send_media",
-        description="Send a photo, document, or video to a Telegram chat",
-    )
-    async def send_media(
-        chat_id: int,
-        file_path: str,
-        caption: str = "",
-        media_type: str = "photo",
-        instance_id: Optional[str] = None,
-    ) -> dict:
-        resolved_id = _require_instance_id(instance_id)
+    @mcp.tool(name="send_message", description="Send a text message to a Telegram chat")
+    async def send_message(chat_id: int, text: str, instance_id: Optional[str] = None) -> dict:
+        resolved_id = require_instance_id(instance_id)
+        return await create_handler("send_message", lambda: svc_send_message(uuid.UUID(resolved_id), text, chat_id=chat_id))
+
+    @mcp.tool(name="send_media", description="Send a photo, document, or video to a Telegram chat")
+    async def send_media(chat_id: int, file_path: str, caption: str = "", media_type: str = "photo", instance_id: Optional[str] = None) -> dict:
+        resolved_id = require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
-
-        client = client_manager.get_client(resolved_id)
-        if client is None or not client.is_connected():
-            raise ValueError("Instance not connected")
-
-        try:
+        async def _run():
+            client = client_manager.get_client(resolved_id)
+            if client is None or not client.is_connected():
+                raise ValueError("Instance not connected")
             result = await client.send_file(chat_id, file_path, caption=caption or None)
             return {"message_id": result.id, "chat_id": chat_id, "status": "sent"}
-        except FloodWaitError as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
-        except Exception as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
+        return await create_handler("send_media", _run)
 
-    @mcp.tool(
-        name="get_messages",
-        description="Get recent messages from a Telegram chat",
-    )
-    async def get_messages(
-        chat_id: int,
-        limit: int = 20,
-        offset: int = 0,
-        instance_id: Optional[str] = None,
-    ) -> dict:
-        resolved_id = _require_instance_id(instance_id)
+    @mcp.tool(name="get_messages", description="Get recent messages from a Telegram chat")
+    async def get_messages(chat_id: int, limit: int = 20, offset: int = 0, instance_id: Optional[str] = None) -> dict:
+        resolved_id = require_instance_id(instance_id)
         from app.services.chats import get_messages as svc_get_messages
+        return await create_handler("get_messages", lambda: svc_get_messages(uuid.UUID(resolved_id), chat_id, limit=limit, offset_id=offset))
 
-        try:
-            messages = await svc_get_messages(uuid.UUID(resolved_id), chat_id, limit=limit, offset_id=offset)
-            return {"messages": messages}
-        except ValueError as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
-
-    @mcp.tool(
-        name="reply_message",
-        description="Reply to a specific message in a Telegram chat",
-    )
-    async def reply_message(
-        chat_id: int,
-        reply_to_msg_id: int,
-        text: str,
-        instance_id: Optional[str] = None,
-    ) -> dict:
-        resolved_id = _require_instance_id(instance_id)
+    @mcp.tool(name="reply_message", description="Reply to a specific message in a Telegram chat")
+    async def reply_message(chat_id: int, reply_to_msg_id: int, text: str, instance_id: Optional[str] = None) -> dict:
+        resolved_id = require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
-
-        client = client_manager.get_client(resolved_id)
-        if client is None or not client.is_connected():
-            raise ValueError("Instance not connected")
-
-        try:
+        async def _run():
+            client = client_manager.get_client(resolved_id)
+            if client is None or not client.is_connected():
+                raise ValueError("Instance not connected")
             result = await client.send_message(chat_id, text, reply_to=reply_to_msg_id)
             return {"message_id": result.id, "chat_id": chat_id, "status": "replied"}
-        except FloodWaitError as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
-        except Exception as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
+        return await create_handler("reply_message", _run)
 
-    @mcp.tool(
-        name="forward_message",
-        description="Forward a message from one chat to another",
-    )
-    async def forward_message(
-        from_chat_id: int,
-        to_chat_id: int,
-        message_id: int,
-        instance_id: Optional[str] = None,
-    ) -> dict:
-        resolved_id = _require_instance_id(instance_id)
+    @mcp.tool(name="forward_message", description="Forward a message from one chat to another")
+    async def forward_message(from_chat_id: int, to_chat_id: int, message_id: int, instance_id: Optional[str] = None) -> dict:
+        resolved_id = require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
-
-        client = client_manager.get_client(resolved_id)
-        if client is None or not client.is_connected():
-            raise ValueError("Instance not connected")
-
-        try:
+        async def _run():
+            client = client_manager.get_client(resolved_id)
+            if client is None or not client.is_connected():
+                raise ValueError("Instance not connected")
             result = await client.forward_messages(to_chat_id, message_id, from_chat_id)
             return {"message_id": result.id, "status": "forwarded"}
-        except FloodWaitError as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
-        except Exception as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
+        return await create_handler("forward_message", _run)
 
-    @mcp.tool(
-        name="edit_message",
-        description="Edit a previously sent message in a Telegram chat",
-    )
-    async def edit_message(
-        chat_id: int,
-        message_id: int,
-        text: str,
-        instance_id: Optional[str] = None,
-    ) -> dict:
-        resolved_id = _require_instance_id(instance_id)
+    @mcp.tool(name="edit_message", description="Edit a previously sent message in a Telegram chat")
+    async def edit_message(chat_id: int, message_id: int, text: str, instance_id: Optional[str] = None) -> dict:
+        resolved_id = require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
-
-        client = client_manager.get_client(resolved_id)
-        if client is None or not client.is_connected():
-            raise ValueError("Instance not connected")
-
-        try:
+        async def _run():
+            client = client_manager.get_client(resolved_id)
+            if client is None or not client.is_connected():
+                raise ValueError("Instance not connected")
             await client.edit_message(chat_id, message_id, text)
             return {"status": "edited"}
-        except FloodWaitError as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
-        except Exception as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
+        return await create_handler("edit_message", _run)
 
-    @mcp.tool(
-        name="delete_message",
-        description="Delete a message from a Telegram chat",
-    )
-    async def delete_message(
-        chat_id: int,
-        message_id: int,
-        instance_id: Optional[str] = None,
-    ) -> dict:
-        resolved_id = _require_instance_id(instance_id)
+    @mcp.tool(name="delete_message", description="Delete a message from a Telegram chat")
+    async def delete_message(chat_id: int, message_id: int, instance_id: Optional[str] = None) -> dict:
+        resolved_id = require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
-
-        client = client_manager.get_client(resolved_id)
-        if client is None or not client.is_connected():
-            raise ValueError("Instance not connected")
-
-        try:
+        async def _run():
+            client = client_manager.get_client(resolved_id)
+            if client is None or not client.is_connected():
+                raise ValueError("Instance not connected")
             await client.delete_messages(chat_id, [message_id])
             return {"status": "deleted"}
-        except FloodWaitError as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
-        except Exception as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
+        return await create_handler("delete_message", _run)
 
-    @mcp.tool(
-        name="add_reaction",
-        description="Add an emoji reaction to a message in a Telegram chat",
-    )
-    async def add_reaction(
-        chat_id: int,
-        message_id: int,
-        emoji: str,
-        instance_id: Optional[str] = None,
-    ) -> dict:
-        resolved_id = _require_instance_id(instance_id)
+    @mcp.tool(name="add_reaction", description="Add an emoji reaction to a message in a Telegram chat")
+    async def add_reaction(chat_id: int, message_id: int, emoji: str, instance_id: Optional[str] = None) -> dict:
+        resolved_id = require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
-
-        client = client_manager.get_client(resolved_id)
-        if client is None or not client.is_connected():
-            raise ValueError("Instance not connected")
-
-        try:
+        async def _run():
+            client = client_manager.get_client(resolved_id)
+            if client is None or not client.is_connected():
+                raise ValueError("Instance not connected")
             from telethon.tl.functions.messages import SendReactionRequest
             from telethon.tl.types import ReactionEmoji
-
-            reaction = ReactionEmoji(emoticon=emoji)
-            await client(SendReactionRequest(
-                peer=chat_id,
-                msg_id=message_id,
-                reaction=[reaction],
-            ))
+            await client(SendReactionRequest(peer=chat_id, msg_id=message_id, reaction=[ReactionEmoji(emoticon=emoji)]))
             return {"status": "reaction_added"}
-        except FloodWaitError as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
-        except Exception as e:
-            raise ValueError(mcp_error_from_telegram(e)["message"])
+        return await create_handler("add_reaction", _run)
