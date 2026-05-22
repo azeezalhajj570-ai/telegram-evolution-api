@@ -9,7 +9,7 @@ from app.services.telegram_manager import client_manager
 
 def register_channel_tools(mcp: FastMCP):
 
-    @mcp.tool(name="list_channels", description="List all Telegram channels the user follows")
+    @mcp.tool(name="channels.list", description="List all Telegram channels the authenticated user follows/subscribes to")
     async def list_channels(instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():
@@ -21,7 +21,7 @@ def register_channel_tools(mcp: FastMCP):
             return {"channels": [sanitize_group(c) for c in raw]}
         return await create_handler("list_channels", _run)
 
-    @mcp.tool(name="join_channel", description="Join a Telegram channel by its ID or username")
+    @mcp.tool(name="channels.join", description="Join/subscribe to a Telegram channel by its channel ID or username")
     async def join_channel(channel_id: int, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():
@@ -33,7 +33,7 @@ def register_channel_tools(mcp: FastMCP):
             return {"status": "joined"}
         return await create_handler("join_channel", _run)
 
-    @mcp.tool(name="leave_channel", description="Leave a Telegram channel")
+    @mcp.tool(name="channels.leave", description="Leave/unsubscribe from a Telegram channel by its channel ID")
     async def leave_channel(channel_id: int, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():

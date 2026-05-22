@@ -10,7 +10,7 @@ from app.services.chats import list_chats as svc_list_chats
 
 def register_chat_tools(mcp: FastMCP):
 
-    @mcp.tool(name="list_chats", description="List recent Telegram chats for an instance")
+    @mcp.tool(name="chats.list", description="List recent Telegram chats/dialogs for an instance, sorted by most recent activity")
     async def list_chats(limit: int = 50, offset: int = 0, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():
@@ -18,7 +18,7 @@ def register_chat_tools(mcp: FastMCP):
             return {"chats": [sanitize_chat(c) for c in chats]}
         return await create_handler("list_chats", _run)
 
-    @mcp.tool(name="get_chat_info", description="Get details about a specific Telegram chat")
+    @mcp.tool(name="chats.info", description="Get detailed information about a specific Telegram chat, group, or user by chat ID")
     async def get_chat_info(chat_id: int, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager
@@ -37,7 +37,7 @@ def register_chat_tools(mcp: FastMCP):
             }
         return await create_handler("get_chat_info", _run)
 
-    @mcp.tool(name="search_messages", description="Search messages in a Telegram chat by query text")
+    @mcp.tool(name="chats.search", description="Search for messages containing specific text in a Telegram chat. Supports partial text matching.")
     async def search_messages(chat_id: int, query: str, limit: int = 20, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         from app.services.telegram_manager import client_manager

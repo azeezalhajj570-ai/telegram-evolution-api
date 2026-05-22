@@ -9,7 +9,7 @@ from app.services.telegram_manager import client_manager
 
 def register_contact_tools(mcp: FastMCP):
 
-    @mcp.tool(name="list_contacts", description="List all Telegram contacts for an instance")
+    @mcp.tool(name="contacts.list", description="List all Telegram contacts saved in the account, with optional limit")
     async def list_contacts(limit: int = 100, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():
@@ -22,7 +22,7 @@ def register_contact_tools(mcp: FastMCP):
             return {"contacts": [sanitize_contact(c) for c in raw[:limit]]}
         return await create_handler("list_contacts", _run)
 
-    @mcp.tool(name="import_contact", description="Import a contact by phone number into Telegram")
+    @mcp.tool(name="contacts.import", description="Import/save a new contact by phone number into the Telegram address book")
     async def import_contact(phone: str, first_name: str, last_name: str = "", instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():
@@ -38,7 +38,7 @@ def register_contact_tools(mcp: FastMCP):
             return {"contact": {"phone": phone, "first_name": first_name, "status": "imported"}}
         return await create_handler("import_contact", _run)
 
-    @mcp.tool(name="delete_contact", description="Delete a contact from Telegram")
+    @mcp.tool(name="contacts.delete", description="Delete a contact from the Telegram address book by contact user ID")
     async def delete_contact(contact_id: int, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():

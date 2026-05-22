@@ -9,7 +9,7 @@ from app.services.telegram_manager import client_manager
 
 def register_group_tools(mcp: FastMCP):
 
-    @mcp.tool(name="list_groups", description="List all Telegram groups the user is a member of")
+    @mcp.tool(name="groups.list", description="List all Telegram groups the authenticated user is a member of")
     async def list_groups(instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():
@@ -21,7 +21,7 @@ def register_group_tools(mcp: FastMCP):
             return {"groups": [sanitize_group(g) for g in raw]}
         return await create_handler("list_groups", _run)
 
-    @mcp.tool(name="create_group", description="Create a new Telegram group")
+    @mcp.tool(name="groups.create", description="Create a new Telegram group with optional initial members")
     async def create_group(title: str, member_ids: str = "", instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():
@@ -34,7 +34,7 @@ def register_group_tools(mcp: FastMCP):
             return {"group_id": result.chats[0].id if result.chats else 0, "status": "created"}
         return await create_handler("create_group", _run)
 
-    @mcp.tool(name="add_group_member", description="Add a member to a Telegram group")
+    @mcp.tool(name="groups.add_member", description="Add a user as a member to a Telegram group by user ID")
     async def add_group_member(group_id: int, user_id: int, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():
@@ -46,7 +46,7 @@ def register_group_tools(mcp: FastMCP):
             return {"status": "added"}
         return await create_handler("add_group_member", _run)
 
-    @mcp.tool(name="remove_group_member", description="Remove a member from a Telegram group")
+    @mcp.tool(name="groups.remove_member", description="Remove a member from a Telegram group by user ID")
     async def remove_group_member(group_id: int, user_id: int, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():

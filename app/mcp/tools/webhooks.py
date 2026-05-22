@@ -10,7 +10,7 @@ from app.mcp.handler import create_handler, require_instance_id
 
 def register_webhook_tools(mcp: FastMCP):
 
-    @mcp.tool(name="configure_webhook", description="Configure a webhook URL for a Telegram instance to receive real-time events")
+    @mcp.tool(name="webhooks.configure", description="Configure or update a webhook URL for a Telegram instance to receive real-time events")
     async def configure_webhook(url: str, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():
@@ -29,7 +29,7 @@ def register_webhook_tools(mcp: FastMCP):
                 return {"webhook_id": str(wh.id), "status": "configured"}
         return await create_handler("configure_webhook", _run)
 
-    @mcp.tool(name="test_webhook", description="Test the webhook configuration for a Telegram instance")
+    @mcp.tool(name="webhooks.test", description="Test the webhook configuration by sending a test event to the configured webhook URL")
     async def test_webhook(instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         async def _run():
