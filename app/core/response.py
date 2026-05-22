@@ -16,6 +16,11 @@ def success_tool(tool: str, data: Any, duration_ms: Optional[int] = None, tenant
     return SuccessResponse(data=data, metadata=m)
 
 
+def rest_success(data: Any, tool: str = "", tenant_id: str = "") -> dict:
+    """Standardized success response for REST endpoints (returns dict for JSON serialization)."""
+    return success_tool(tool, data, tenant_id=tenant_id).model_dump()
+
+
 def error_tool(
     tool: str,
     code: str,
@@ -31,3 +36,15 @@ def error_tool(
         details=details,
         metadata=_metadata(tool, tenant_id),
     )
+
+
+def rest_error(
+    tool: str,
+    code: str,
+    message: str,
+    retryable: bool = False,
+    details: Any = None,
+    tenant_id: str = "",
+) -> dict:
+    """Standardized error response for REST endpoints (returns dict for HTTPException detail)."""
+    return error_tool(tool, code, message, retryable, details, tenant_id).model_dump()

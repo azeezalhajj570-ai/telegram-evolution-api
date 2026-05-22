@@ -7,8 +7,11 @@ from fastapi.responses import JSONResponse
 
 from app.api import auth, chats, instances, messages, organizations, webhooks
 from app.config import settings
+from app.core.response import rest_error, rest_success
+from app.core.error_codes import ErrorCodes
 from app.db.database import Base, async_session, engine
 from app.db.repositories import InstanceRepository
+from app.middleware.asgi import RequestContextMiddleware
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -50,11 +53,7 @@ async def lifespan(app: FastAPI):
             for raw_key in settings.api_keys_list:
                 result = await db.execute(select(ApiKey).where(ApiKey.name == f"auto:{raw_key[:8]}"))
                 if not result.scalar_one_or_none():
-                    db.add(ApiKey(
-                        name=f"auto:{raw_key[:8]}",
-                        key_hash=hash_api_key(raw_key),
-                        is_active=True,
-                    ))
+                    db.add(ApiKey(name=f"auto:{raw_key[:8]}", key_hash=hash_api_key(raw_key), is_active=True))
             await db.commit()
 
     await _reconnect_instances()
@@ -82,6 +81,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(RequestContextMiddleware)
+
 app.include_router(instances.router)
 app.include_router(auth.router)
 app.include_router(messages.router)
@@ -93,16 +94,14 @@ app.include_router(organizations.router)
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
-    return JSONResponse(
-        status_code=500,
-        content={"error": "internal_error", "detail": "An unexpected error occurred"},
-    )
+    err = rest_error("", ErrorCodes.INTERNAL_ERROR.value, "An unexpected error occurred")
+    return JSONResponse(status_code=500, content=err)
 
 
 @app.get("/health")
 async def health():
-    return {
+    return rest_success({
         "status": "healthy",
         "version": "0.1.0",
         "uptime_seconds": int(time.time() - _start_time),
-    }
+    }, "health")
