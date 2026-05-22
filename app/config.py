@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     telegram_api_hash: str = ""
     webhook_retry_max: int = 3
     webhook_retry_base_delay: int = 60
+    jwt_secret: str = ""
+    jwt_ttl: int = 3600
     mcp_transport: str = "stdio"
     mcp_host: str = "0.0.0.0"
     mcp_port: int = 8001
