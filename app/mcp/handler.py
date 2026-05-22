@@ -72,7 +72,9 @@ async def _exec(tool_name: str, fn: Callable[[], Any]) -> Any:
     """Execute the actual handler with timing and standardized response."""
     start = time.monotonic()
     try:
-        result = await fn() if inspect.iscoroutinefunction(fn) else fn()
+        result = fn()
+        if inspect.isawaitable(result):
+            result = await result
         duration_ms = int((time.monotonic() - start) * 1000)
         return success_tool(tool_name, result, duration_ms)
     except Exception as e:

@@ -1,5 +1,5 @@
 import uuid
-from typing import Optional
+from typing import Annotated, Optional
 
 from mcp.server.fastmcp import FastMCP
 
@@ -10,10 +10,16 @@ from app.services.messaging import send_message as svc_send_message
 
 def register_messaging_tools(mcp: FastMCP):
 
-    @mcp.tool(name="messages.send", description="Send a plain text message to a Telegram chat, group, or user by chat_id, username, or phone number")
-    async def send_message(chat_id: int, text: str, instance_id: Optional[str] = None) -> dict:
+    @mcp.tool(name="messages.send", description="Send a plain text message to a Telegram chat, group, or user by chat_id, username, or phone number. Provide one of: chat_id, username, or phone_number.")
+    async def send_message(
+        text: Annotated[str, "Message text content"],
+        chat_id: Annotated[Optional[int], "Telegram chat/group/user ID (numeric). Provide this OR username OR phone_number."] = None,
+        username: Annotated[Optional[str], "Telegram username without @ (e.g. 'johndoe'). Provide this OR chat_id OR phone_number."] = None,
+        phone_number: Annotated[Optional[str], "Phone number in international format (e.g. '+5511999999999'). Provide this OR chat_id OR username."] = None,
+        instance_id: Annotated[Optional[str], "Instance ID (omit if using scoped key)"] = None,
+    ) -> dict:
         resolved_id = require_instance_id(instance_id)
-        return await create_handler("send_message", lambda: svc_send_message(uuid.UUID(resolved_id), text, chat_id=chat_id))
+        return await create_handler("messages.send", lambda: svc_send_message(uuid.UUID(resolved_id), text, chat_id=chat_id, username=username, phone_number=phone_number))
 
     @mcp.tool(name="messages.send_media", description="Send a photo, document, or video to a Telegram chat from a local file path or URL")
     async def send_media(chat_id: int, file_path: str, caption: str = "", media_type: str = "photo", instance_id: Optional[str] = None) -> dict:
