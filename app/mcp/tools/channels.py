@@ -3,6 +3,7 @@ from typing import Optional
 from mcp.server.fastmcp import FastMCP
 
 from app.mcp.handler import create_handler, require_instance_id
+from app.mcp.sanitize import sanitize_group
 from app.services.telegram_manager import client_manager
 
 
@@ -16,11 +17,8 @@ def register_channel_tools(mcp: FastMCP):
             if client is None or not client.is_connected():
                 raise ValueError("Instance not connected")
             dialogs = await client.get_dialogs()
-            channels = [
-                {"channel_id": d.entity.id, "title": d.title or "Unknown", "username": getattr(d.entity, "username", None), "participants_count": getattr(d.entity, "participants_count", None)}
-                for d in dialogs if d.is_channel and not d.is_group
-            ]
-            return {"channels": channels}
+            raw = [{"channel_id": d.entity.id, "title": d.title or "Unknown", "username": getattr(d.entity, "username", None), "participants_count": getattr(d.entity, "participants_count", None)} for d in dialogs if d.is_channel and not d.is_group]
+            return {"channels": [sanitize_group(c) for c in raw]}
         return await create_handler("list_channels", _run)
 
     @mcp.tool(name="join_channel", description="Join a Telegram channel by its ID or username")

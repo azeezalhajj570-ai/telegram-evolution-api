@@ -4,6 +4,7 @@ from typing import Optional
 from mcp.server.fastmcp import FastMCP
 
 from app.mcp.handler import create_handler, require_instance_id
+from app.mcp.sanitize import sanitize_message
 from app.services.messaging import send_message as svc_send_message
 
 
@@ -30,7 +31,10 @@ def register_messaging_tools(mcp: FastMCP):
     async def get_messages(chat_id: int, limit: int = 20, offset: int = 0, instance_id: Optional[str] = None) -> dict:
         resolved_id = require_instance_id(instance_id)
         from app.services.chats import get_messages as svc_get_messages
-        return await create_handler("get_messages", lambda: svc_get_messages(uuid.UUID(resolved_id), chat_id, limit=limit, offset_id=offset))
+        async def _run():
+            msgs = await svc_get_messages(uuid.UUID(resolved_id), chat_id, limit=limit, offset_id=offset)
+            return {"messages": [sanitize_message(m) for m in msgs]}
+        return await create_handler("get_messages", _run)
 
     @mcp.tool(name="reply_message", description="Reply to a specific message in a Telegram chat")
     async def reply_message(chat_id: int, reply_to_msg_id: int, text: str, instance_id: Optional[str] = None) -> dict:

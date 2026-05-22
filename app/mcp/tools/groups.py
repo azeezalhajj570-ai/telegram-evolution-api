@@ -3,6 +3,7 @@ from typing import Optional
 from mcp.server.fastmcp import FastMCP
 
 from app.mcp.handler import create_handler, require_instance_id
+from app.mcp.sanitize import sanitize_group
 from app.services.telegram_manager import client_manager
 
 
@@ -16,11 +17,8 @@ def register_group_tools(mcp: FastMCP):
             if client is None or not client.is_connected():
                 raise ValueError("Instance not connected")
             dialogs = await client.get_dialogs()
-            groups = [
-                {"group_id": d.entity.id, "title": d.title or "Unknown", "participants_count": getattr(d.entity, "participants_count", None)}
-                for d in dialogs if d.is_group
-            ]
-            return {"groups": groups}
+            raw = [{"group_id": d.entity.id, "title": d.title or "Unknown", "participants_count": getattr(d.entity, "participants_count", None)} for d in dialogs if d.is_group]
+            return {"groups": [sanitize_group(g) for g in raw]}
         return await create_handler("list_groups", _run)
 
     @mcp.tool(name="create_group", description="Create a new Telegram group")

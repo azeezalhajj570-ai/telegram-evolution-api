@@ -3,6 +3,7 @@ from typing import Optional
 from mcp.server.fastmcp import FastMCP
 
 from app.mcp.handler import create_handler, require_instance_id
+from app.mcp.sanitize import sanitize_contact
 from app.services.telegram_manager import client_manager
 
 
@@ -17,11 +18,8 @@ def register_contact_tools(mcp: FastMCP):
                 raise ValueError("Instance not connected")
             from telethon.tl.functions.contacts import GetContactsRequest
             result = await client(GetContactsRequest(hash=0))
-            contacts = [
-                {"user_id": u.id, "first_name": u.first_name or "", "last_name": u.last_name or "", "phone": u.phone or "", "username": u.username or ""}
-                for u in result.users if u
-            ]
-            return {"contacts": contacts[:limit] if limit else contacts}
+            raw = [{"user_id": u.id, "first_name": u.first_name or "", "last_name": u.last_name or "", "phone": u.phone or "", "username": u.username or ""} for u in result.users if u]
+            return {"contacts": [sanitize_contact(c) for c in raw[:limit]]}
         return await create_handler("list_contacts", _run)
 
     @mcp.tool(name="import_contact", description="Import a contact by phone number into Telegram")
